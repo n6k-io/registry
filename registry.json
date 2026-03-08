@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "@n6k.io/ui",
+  "homepage": "https://github.com/n6k-io/ui",
+  "items": [
+    {
+      "name": "duckdb-test",
+      "type": "registry:ui",
+      "title": "DuckDB Test",
+      "description": "DuckDB WASM test component with n6k extension support.",
+      "dependencies": [
+        "@duckdb/duckdb-wasm",
+        "@n6k.io/db"
+      ],
+      "files": [
+        {
+          "path": "ui/duckdb-test.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}
