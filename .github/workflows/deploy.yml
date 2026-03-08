@@ -33,13 +33,16 @@ jobs:
       - name: Build registry
         run: bunx shadcn build
 
+      - name: Build site
+        run: bunx astro build
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'public'
+          path: 'dist'
 
       - name: Deploy to GitHub Pages
         id: deployment

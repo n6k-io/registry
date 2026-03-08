@@ -1,0 +1,50 @@
+---
+import "../styles/global.css";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+const registry = JSON.parse(
+  readFileSync(join(process.cwd(), "public", "r", "registry.json"), "utf-8")
+);
+
+const items = registry.items ?? [];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{registry.name}</title>
+  </head>
+  <body class="bg-neutral-950 text-neutral-200 p-8 font-sans">
+    <h1 class="text-2xl font-semibold mb-1">{registry.name}</h1>
+    <p class="text-neutral-500 text-sm mb-8">{items.length} component(s)</p>
+
+    <div class="flex flex-col gap-4 max-w-xl">
+      {items.map((item: any) => (
+        <div class="border border-neutral-800 rounded-lg p-4">
+          <h2 class="text-base font-medium mb-1">{item.title || item.name}</h2>
+          <p class="text-neutral-400 text-sm mb-3">{item.description}</p>
+          <code class="text-xs bg-neutral-900 px-2 py-1 rounded text-neutral-300">
+            bunx shadcn@latest add "{registry.homepage}/{item.name}"
+          </code>
+          {item.dependencies?.length > 0 && (
+            <div class="flex gap-2 flex-wrap mt-2">
+              {item.dependencies.map((dep: string) => (
+                <span class="text-xs bg-neutral-900 border border-neutral-800 px-2 py-0.5 rounded-full text-neutral-400">
+                  {dep}
+                </span>
+              ))}
+            </div>
+          )}
+          <a
+            href={`./r/${item.name}.json`}
+            class="text-xs text-neutral-600 hover:text-neutral-400 mt-2 inline-block"
+          >
+            {item.name}.json
+          </a>
+        </div>
+      ))}
+    </div>
+  </body>
+</html>
