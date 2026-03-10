@@ -18,6 +18,402 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "Button component with variants.",
+      "dependencies": [
+        "class-variance-authority",
+        "radix-ui"
+      ],
+      "files": [
+        {
+          "path": "ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "description": "Input component.",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "ui/input.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "Card container with header, content, footer sub-components.",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "ui/card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox",
+      "description": "Checkbox component.",
+      "dependencies": [
+        "radix-ui",
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "ui/checkbox.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "label",
+      "type": "registry:ui",
+      "title": "Label",
+      "description": "Label component.",
+      "dependencies": [
+        "radix-ui"
+      ],
+      "files": [
+        {
+          "path": "ui/label.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "Table primitives.",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "ui/table.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-chart-utils",
+      "type": "registry:lib",
+      "title": "Chart Utilities",
+      "description": "Shared hooks and functions for chart components.",
+      "dependencies": [
+        "@n6k.io/ui",
+        "apache-arrow",
+        "vega-embed"
+      ],
+      "files": [
+        {
+          "path": "lib/n6k-chart-utils.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "n6k-page",
+      "type": "registry:ui",
+      "title": "Page",
+      "description": "Page layout wrapper with document title interpolation.",
+      "dependencies": [
+        "@n6k.io/ui"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-page.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-title",
+      "type": "registry:ui",
+      "title": "Title",
+      "description": "Heading component with text interpolation.",
+      "dependencies": [
+        "@n6k.io/ui"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-title.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-section",
+      "type": "registry:ui",
+      "title": "Section",
+      "description": "Section layout with title.",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "ui/n6k-section.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-grid",
+      "type": "registry:ui",
+      "title": "Grid",
+      "description": "CSS grid layout with custom column template.",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "ui/n6k-grid.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-columns",
+      "type": "registry:ui",
+      "title": "Columns",
+      "description": "Equal-width column grid layout.",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "ui/n6k-columns.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-conditional",
+      "type": "registry:ui",
+      "title": "Conditional",
+      "description": "Conditionally renders children based on a binding value.",
+      "dependencies": [
+        "@n6k.io/ui"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-conditional.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-metric",
+      "type": "registry:ui",
+      "title": "Metric",
+      "description": "KPI metric display with optional SQL-driven value and delta.",
+      "dependencies": [
+        "@n6k.io/ui"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-metric.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-pills",
+      "type": "registry:ui",
+      "title": "Pills",
+      "description": "Multi-select pill toggle bound to a binding.",
+      "dependencies": [
+        "@n6k.io/ui"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-pills.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-toggle",
+      "type": "registry:ui",
+      "title": "Toggle",
+      "description": "Boolean toggle bound to a binding.",
+      "dependencies": [
+        "@n6k.io/ui"
+      ],
+      "registryDependencies": [
+        "checkbox",
+        "label"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-toggle.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-data-table",
+      "type": "registry:ui",
+      "title": "Data Table",
+      "description": "Virtualized, sortable data table with DuckDB query support.",
+      "dependencies": [
+        "@n6k.io/ui",
+        "@tanstack/react-table",
+        "@tanstack/react-virtual",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "input",
+        "table"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-data-table.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-query",
+      "type": "registry:ui",
+      "title": "Query",
+      "description": "Interactive SQL query editor with result table.",
+      "dependencies": [
+        "@n6k.io/ui"
+      ],
+      "registryDependencies": [
+        "n6k-data-table",
+        "input",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-query.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-bar-chart",
+      "type": "registry:ui",
+      "title": "Bar Chart",
+      "description": "Bar chart with aggregation, error bars, dodge, and hue support.",
+      "dependencies": [
+        "@n6k.io/ui",
+        "apache-arrow",
+        "vega-embed"
+      ],
+      "registryDependencies": [
+        "n6k-chart-utils"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-bar-chart.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-line-chart",
+      "type": "registry:ui",
+      "title": "Line Chart",
+      "description": "Line chart with hue and temporal axis support.",
+      "dependencies": [
+        "apache-arrow",
+        "vega-embed"
+      ],
+      "registryDependencies": [
+        "n6k-chart-utils"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-line-chart.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-pie-chart",
+      "type": "registry:ui",
+      "title": "Pie Chart",
+      "description": "Pie/donut chart with aggregation support.",
+      "dependencies": [
+        "@n6k.io/ui",
+        "apache-arrow",
+        "vega-embed"
+      ],
+      "registryDependencies": [
+        "n6k-chart-utils"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-pie-chart.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-scatter-chart",
+      "type": "registry:ui",
+      "title": "Scatter Chart",
+      "description": "Scatter plot with hue and size encoding.",
+      "dependencies": [
+        "apache-arrow",
+        "vega-embed"
+      ],
+      "registryDependencies": [
+        "n6k-chart-utils"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-scatter-chart.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-histogram",
+      "type": "registry:ui",
+      "title": "Histogram",
+      "description": "Histogram with configurable bins, stats, and hue.",
+      "dependencies": [
+        "@n6k.io/ui",
+        "apache-arrow",
+        "vega-embed"
+      ],
+      "registryDependencies": [
+        "n6k-chart-utils"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-histogram.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "n6k-vega-chart",
+      "type": "registry:ui",
+      "title": "Vega Chart",
+      "description": "Raw Vega-Lite spec renderer with DuckDB data source.",
+      "dependencies": [
+        "@n6k.io/ui",
+        "apache-arrow",
+        "vega-embed"
+      ],
+      "registryDependencies": [
+        "n6k-chart-utils"
+      ],
+      "files": [
+        {
+          "path": "ui/n6k-vega-chart.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

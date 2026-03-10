@@ -1,0 +1,54 @@
+import { useBinding } from "@n6k.io/ui";
+import { cn } from "@/lib/utils";
+
+export function N6KPills({
+  label,
+  options,
+  bind,
+  multi = true,
+}: {
+  label?: string;
+  options: (string | number)[];
+  bind: string;
+  multi?: boolean;
+}) {
+  const [selected, setSelected] = useBinding<(string | number)[]>(bind);
+  const current = selected ?? [];
+
+  const toggle = (option: string | number) => {
+    if (multi) {
+      const next = current.includes(option)
+        ? current.filter((v) => v !== option)
+        : [...current, option];
+      setSelected(next);
+    } else {
+      setSelected([option]);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      {label && (
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      )}
+      {options.map((option) => {
+        const active = current.includes(option);
+        return (
+          <button
+            key={String(option)}
+            onClick={() => toggle(option)}
+            className={cn(
+              "inline-flex items-center rounded-full px-3 py-1 text-sm font-medium transition-colors",
+              "border",
+              active
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted",
+            )}
+          >
+            {String(option)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
