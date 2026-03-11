@@ -1,4 +1,4 @@
-import { useQuery } from "@n6k.io/ui";
+import { useQuery } from "@n6k.io/db/react";
 import { cn } from "@/lib/utils";
 
 function isSQL(s: string): boolean {

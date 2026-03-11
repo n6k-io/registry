@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { useDuckDB } from '@n6k.io/ui/lib/use-duckdb'
+import { useDuckDB } from '@n6k.io/db/react'
 
 export function DuckdbTest() {
   const { conn, status, error } = useDuckDB()

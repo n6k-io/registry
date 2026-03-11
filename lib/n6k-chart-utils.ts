@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useQuery, useInterpolate } from "@n6k.io/ui";
+import { useQuery } from "@n6k.io/db/react";
+import { useInterpolate } from "@n6k.io/ui";
 import { Type, Schema } from "apache-arrow";
 import vegaEmbed from "vega-embed";
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@n6k.io/ui";
+import { useQuery } from "@n6k.io/db/react";
 import { DataTable } from "@/components/ui/n6k-data-table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

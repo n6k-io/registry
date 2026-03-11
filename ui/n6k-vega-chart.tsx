@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { useQuery, useInterpolate } from "@n6k.io/ui";
+import { useQuery } from "@n6k.io/db/react";
+import { useInterpolate } from "@n6k.io/ui";
 import { resolveDataSource, useVegaChart } from "@/lib/n6k-chart-utils";
 
 export function N6KVegaChart({

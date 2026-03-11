@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, useCallback } from "react";
-import { useQuery, useInterpolate } from "@n6k.io/ui";
+import { useQuery } from "@n6k.io/db/react";
+import { useInterpolate } from "@n6k.io/ui";
 import {
   useReactTable,
   getCoreRowModel,
