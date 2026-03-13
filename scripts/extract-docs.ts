@@ -125,5 +125,5 @@ function cleanTypeText(type: string): string {
   return type.replace(/import\([^)]+\)\./g, "");
 }
 
-writeFileSync(join(root, "docs.json"), JSON.stringify(docs, null, 2));
-console.log(`Generated docs.json with ${Object.keys(docs).length} components`);
+writeFileSync(join(root, "public", "docs.json"), JSON.stringify(docs, null, 2));
+console.log(`Generated public/docs.json with ${Object.keys(docs).length} components`);

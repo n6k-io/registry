@@ -30,7 +30,7 @@ const component = JSON.parse(
 const installCmd = `bunx shadcn@latest add @n6k/${name}`;
 
 // Load docs
-const docsPath = join(process.cwd(), "docs.json");
+const docsPath = join(process.cwd(), "public", "docs.json");
 const allDocs = existsSync(docsPath)
   ? JSON.parse(readFileSync(docsPath, "utf-8"))
   : {};

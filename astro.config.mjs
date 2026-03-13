@@ -26,8 +26,21 @@ export default defineConfig({
         "@": resolve("src"),
       },
     },
+    server: {
+      headers: {
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+      },
+    },
+    preview: {
+      headers: {
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+      },
+    },
     optimizeDeps: {
       exclude: ["@duckdb/duckdb-wasm"],
+      include: ["handlebars"],
     },
   },
 });
