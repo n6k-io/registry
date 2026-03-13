@@ -35,3 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 public/r/
 .astro/
 scratch/
+public/v1.4.4/
+public/r
+public/docs.json
