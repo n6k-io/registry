@@ -1,6 +1,18 @@
 import { useRef, useMemo } from "react";
 import { useChartData, useVegaChart, inferType, resolveField, temporalAxisConfig, type LegendOrient } from "@/lib/n6k-chart-utils";
 
+/**
+ * Line chart with hue grouping and temporal axis support.
+ * @param props.table - DuckDB table name as the data source.
+ * @param props.query - SQL query as the data source (mutually exclusive with table).
+ * @param props.x - Field or expression mapped to the x-axis.
+ * @param props.y - Field or expression mapped to the y-axis.
+ * @param props.hue - Field used for color grouping (one line per value).
+ * @param props.sort - Whether to sort x-axis values (defaults to true).
+ * @param props.xTitle - Custom x-axis title.
+ * @param props.yTitle - Custom y-axis title.
+ * @param props.legend - Legend position or "none".
+ */
 export function N6KLineChart({
   table,
   query,

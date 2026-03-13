@@ -1,9 +1,11 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { CodeViewer } from "../../components/code-viewer";
+import { SourceViewer } from "../../components/source-viewer";
 import { ExampleRenderer } from "../../components/example-renderer";
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { join, basename } from "path";
+import { getHighlighter, highlight } from "../../lib/highlighter";
 
 export function getStaticPaths() {
   const dir = join(process.cwd(), "public", "r");
@@ -27,6 +29,16 @@ const component = JSON.parse(
 
 const installCmd = `bunx shadcn@latest add @n6k/${name}`;
 
+// Load docs
+const docsPath = join(process.cwd(), "docs.json");
+const allDocs = existsSync(docsPath)
+  ? JSON.parse(readFileSync(docsPath, "utf-8"))
+  : {};
+
+type PropDoc = { name: string; type: string; optional: boolean; description: string };
+type ExportDoc = { name: string; description: string; import: string; props: PropDoc[] };
+const componentDocs: { exports: ExportDoc[] } | undefined = allDocs[name];
+
 // Load examples
 const examplesPath = join(process.cwd(), "examples.json");
 const examplesMap = existsSync(examplesPath)
@@ -36,20 +48,52 @@ const examplesMap = existsSync(examplesPath)
 type ExampleEntry = { title: string; description?: string; path: string };
 const exampleEntries: ExampleEntry[] = examplesMap[name] ?? [];
 
+// Syntax highlighter (singleton)
+const highlighter = await getHighlighter();
+
 const examples = exampleEntries.map((entry) => {
   const absPath = join(process.cwd(), entry.path);
   const globPath = entry.path.replace("./examples/", "../../examples/");
+  const code = existsSync(absPath) ? readFileSync(absPath, "utf-8") : "";
   return {
     title: entry.title,
     description: entry.description,
     globPath,
     filename: basename(entry.path),
-    code: existsSync(absPath) ? readFileSync(absPath, "utf-8") : "",
+    code,
+    html: code ? highlight(highlighter, code) : "",
   };
 });
 
 const heroExample = examples[0];
 const additionalExamples = examples.slice(1);
+
+// Resolve registry dependency links
+const registryDeps: { name: string; displayName: string; href: string | null }[] = [];
+if (component.registryDependencies) {
+  const rDir = join(process.cwd(), "public", "r");
+  for (const dep of component.registryDependencies as string[]) {
+    const stripped = dep.startsWith("@n6k/") ? dep.slice(5) : dep;
+    const hasPage = existsSync(join(rDir, `${stripped}.json`));
+    registryDeps.push({
+      name: dep,
+      displayName: stripped,
+      href: hasPage ? `/component/${stripped}` : null,
+    });
+  }
+}
+
+// Source files — highlight for the sheet
+const sourceFiles = (component.files ?? [])
+  .filter((f: any) => f.content)
+  .map((f: any) => {
+    const lang = f.path.endsWith(".ts") ? "typescript" as const : "tsx" as const;
+    return {
+      path: f.path,
+      code: f.content,
+      html: highlight(highlighter, f.content, lang),
+    };
+  });
 ---
 
 <Base title={`${component.title || name} - ${registry.name}`}>
@@ -63,8 +107,15 @@ const additionalExamples = examples.slice(1);
     Back
   </a>
 
-  <h1 class="text-2xl font-semibold mb-1">{component.title || name}</h1>
-  <p class="text-neutral-500 dark:text-neutral-500 text-sm mb-6">{component.description}</p>
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold mb-1">{component.title || name}</h1>
+      <p class="text-neutral-500 dark:text-neutral-500 text-sm">{component.description}</p>
+    </div>
+    {sourceFiles.length > 0 && (
+      <SourceViewer files={sourceFiles} client:load />
+    )}
+  </div>
 
   {heroExample && (
     <section class="mb-8">
@@ -73,8 +124,77 @@ const additionalExamples = examples.slice(1);
           <ExampleRenderer examplePath={heroExample.globPath} client:load />
         </div>
         <div class="flex items-center justify-end px-4 py-2 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-          <CodeViewer code={heroExample.code} filename={heroExample.filename} client:load />
+          <CodeViewer code={heroExample.code} html={heroExample.html} filename={heroExample.filename} client:load />
         </div>
+      </div>
+    </section>
+  )}
+
+  {componentDocs && componentDocs.exports.length > 0 && (
+    <section class="mb-8">
+      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Usage</h2>
+      <div class="space-y-4">
+        {componentDocs.exports.map((exp) => (
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm font-medium text-neutral-900 dark:text-neutral-200">{exp.name}</span>
+              {exp.description && (
+                <span class="text-xs text-neutral-500 dark:text-neutral-400">{exp.description}</span>
+              )}
+            </div>
+            <div class="relative group">
+              <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto"><code class="copy-content">{exp.import}</code></pre>
+              <button
+                class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:hover:text-neutral-200"
+                aria-label={`Copy ${exp.name} import`}
+              >
+                <svg class="copy-icon w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                </svg>
+                <svg class="check-icon w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {componentDocs && componentDocs.exports.some((e) => e.props.length > 0) && (
+    <section class="mb-8">
+      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Props</h2>
+      <div class="space-y-6">
+        {componentDocs.exports.filter((e) => e.props.length > 0).map((exp) => (
+          <div>
+            {componentDocs.exports.filter((e) => e.props.length > 0).length > 1 && (
+              <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-200 mb-2">{exp.name}</h3>
+            )}
+            <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900">
+                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Name</th>
+                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</th>
+                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Required</th>
+                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exp.props.map((prop: PropDoc) => (
+                    <tr class="border-b border-neutral-200 dark:border-neutral-800 last:border-0">
+                      <td class="px-4 py-2 font-mono text-xs text-neutral-900 dark:text-neutral-200">{prop.name}</td>
+                      <td class="px-4 py-2 font-mono text-xs text-neutral-500 dark:text-neutral-400">{prop.type}</td>
+                      <td class="px-4 py-2 text-xs text-neutral-500 dark:text-neutral-400">{prop.optional ? "No" : "Yes"}</td>
+                      <td class="px-4 py-2 text-xs text-neutral-500 dark:text-neutral-400">{prop.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   )}
@@ -82,16 +202,15 @@ const additionalExamples = examples.slice(1);
   <section class="mb-8">
     <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Install</h2>
     <div class="relative group">
-      <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto"><code id="install-cmd">{installCmd}</code></pre>
+      <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto"><code class="copy-content">{installCmd}</code></pre>
       <button
-        id="copy-btn"
-        class="absolute top-2 right-2 p-1.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:hover:text-neutral-200"
+        class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:hover:text-neutral-200"
         aria-label="Copy install command"
       >
-        <svg id="copy-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="copy-icon w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
         </svg>
-        <svg id="check-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="check-icon w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </button>
@@ -111,14 +230,23 @@ const additionalExamples = examples.slice(1);
     </section>
   )}
 
-  {(component.registryDependencies?.length > 0) && (
+  {registryDeps.length > 0 && (
     <section class="mb-8">
       <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Registry Dependencies</h2>
       <div class="flex gap-2 flex-wrap">
-        {component.registryDependencies.map((dep: string) => (
-          <span class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400">
-            {dep}
-          </span>
+        {registryDeps.map((dep) => (
+          dep.href ? (
+            <a
+              href={dep.href}
+              class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:border-neutral-400 dark:hover:border-neutral-600"
+            >
+              {dep.displayName}
+            </a>
+          ) : (
+            <span class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400">
+              {dep.displayName}
+            </span>
+          )
         ))}
       </div>
     </section>
@@ -139,7 +267,7 @@ const additionalExamples = examples.slice(1);
                 <ExampleRenderer examplePath={ex.globPath} client:load />
               </div>
               <div class="flex items-center justify-end px-4 py-2 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-                <CodeViewer code={ex.code} filename={ex.filename} client:load />
+                <CodeViewer code={ex.code} html={ex.html} filename={ex.filename} client:load />
               </div>
             </div>
           </div>
@@ -149,15 +277,21 @@ const additionalExamples = examples.slice(1);
   )}
 
   <script is:inline>
-    document.getElementById("copy-btn").addEventListener("click", () => {
-      const cmd = document.getElementById("install-cmd").textContent;
-      navigator.clipboard.writeText(cmd).then(() => {
-        document.getElementById("copy-icon").classList.add("hidden");
-        document.getElementById("check-icon").classList.remove("hidden");
-        setTimeout(() => {
-          document.getElementById("copy-icon").classList.remove("hidden");
-          document.getElementById("check-icon").classList.add("hidden");
-        }, 2000);
+    document.querySelectorAll(".copy-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const container = btn.closest(".relative, .rounded-lg");
+        const content = container?.querySelector(".copy-content");
+        if (!content) return;
+        navigator.clipboard.writeText(content.textContent || "").then(() => {
+          const copyIcon = btn.querySelector(".copy-icon");
+          const checkIcon = btn.querySelector(".check-icon");
+          copyIcon?.classList.add("hidden");
+          checkIcon?.classList.remove("hidden");
+          setTimeout(() => {
+            copyIcon?.classList.remove("hidden");
+            checkIcon?.classList.add("hidden");
+          }, 2000);
+        });
       });
     });
   </script>

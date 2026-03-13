@@ -5,5 +5,12 @@
       "description": "A page layout wrapper with document title interpolation.",
       "path": "./examples/n6k-page/page-01.tsx"
     }
+  ],
+  "n6k-metric": [
+    {
+      "title": "SQL-Driven Metrics",
+      "description": "KPI cards with values driven by DuckDB SQL queries.",
+      "path": "./examples/n6k-metric/metric-01.tsx"
+    }
   ]
 }

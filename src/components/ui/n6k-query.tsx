@@ -18,6 +18,11 @@ function QueryResults({ query }: { query: string }) {
   return <DataTable columns={columns} rows={rows} />;
 }
 
+/**
+ * Interactive SQL query editor with a result table.
+ * @param props.query - Initial SQL query string pre-filled in the editor.
+ * @param props.className - Additional CSS classes for the root container.
+ */
 export function N6KQuery({
   query: initialQuery = "",
   className,

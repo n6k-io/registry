@@ -1,6 +1,15 @@
 import { useRef, useMemo } from "react";
 import { useChartData, useVegaChart, inferType, resolveField } from "@/lib/n6k-chart-utils";
 
+/**
+ * Scatter plot with optional hue and size encoding.
+ * @param props.table - DuckDB table name as the data source.
+ * @param props.query - SQL query as the data source (mutually exclusive with table).
+ * @param props.x - Field or expression mapped to the x-axis.
+ * @param props.y - Field or expression mapped to the y-axis.
+ * @param props.hue - Field used for color grouping.
+ * @param props.size - Field mapped to point size.
+ */
 export function N6KScatterChart({
   table,
   query,

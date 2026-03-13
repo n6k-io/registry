@@ -1,6 +1,13 @@
 import { useBinding } from "@n6k.io/ui";
 import { cn } from "@/lib/utils";
 
+/**
+ * Multi-select pill toggle bound to a reactive binding.
+ * @param props.label - Optional label displayed before the pills.
+ * @param props.options - Array of selectable option values.
+ * @param props.bind - Binding key for the selected values array.
+ * @param props.multi - Whether multiple pills can be active at once.
+ */
 export function N6KPills({
   label,
   options,

@@ -5,6 +5,17 @@ import { useVegaChart, resolveSourceForSQL, isExpression, type LegendOrient } fr
 
 type Aggregate = "sum" | "count" | "mean";
 
+/**
+ * Pie/donut chart with SQL aggregation support.
+ * @param props.table - DuckDB table name as the data source.
+ * @param props.query - SQL query as the data source (mutually exclusive with table).
+ * @param props.names - Field used for slice labels.
+ * @param props.values - Field aggregated for slice sizes (omit for count).
+ * @param props.aggregate - Aggregation function: "sum", "count", or "mean".
+ * @param props.palette - Array of CSS color strings for the color scale.
+ * @param props.innerRadius - Inner radius in pixels to create a donut chart.
+ * @param props.legend - Legend position or "none".
+ */
 export function N6KPieChart({
   table,
   query,

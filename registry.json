@@ -14,7 +14,7 @@
       ],
       "files": [
         {
-          "path": "ui/duckdb-test.tsx",
+          "path": "src/components/ui/duckdb-test.tsx",
           "type": "registry:ui"
         }
       ]
@@ -31,7 +31,7 @@
       ],
       "files": [
         {
-          "path": "lib/n6k-chart-utils.ts",
+          "path": "src/lib/n6k-chart-utils.ts",
           "type": "registry:lib"
         }
       ]
@@ -46,7 +46,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-page.tsx",
+          "path": "src/components/ui/n6k-page.tsx",
           "type": "registry:ui"
         }
       ]
@@ -61,7 +61,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-title.tsx",
+          "path": "src/components/ui/n6k-title.tsx",
           "type": "registry:ui"
         }
       ]
@@ -74,7 +74,7 @@
       "dependencies": [],
       "files": [
         {
-          "path": "ui/n6k-section.tsx",
+          "path": "src/components/ui/n6k-section.tsx",
           "type": "registry:ui"
         }
       ]
@@ -87,7 +87,7 @@
       "dependencies": [],
       "files": [
         {
-          "path": "ui/n6k-grid.tsx",
+          "path": "src/components/ui/n6k-grid.tsx",
           "type": "registry:ui"
         }
       ]
@@ -100,7 +100,7 @@
       "dependencies": [],
       "files": [
         {
-          "path": "ui/n6k-columns.tsx",
+          "path": "src/components/ui/n6k-columns.tsx",
           "type": "registry:ui"
         }
       ]
@@ -115,7 +115,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-conditional.tsx",
+          "path": "src/components/ui/n6k-conditional.tsx",
           "type": "registry:ui"
         }
       ]
@@ -130,7 +130,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-metric.tsx",
+          "path": "src/components/ui/n6k-metric.tsx",
           "type": "registry:ui"
         }
       ]
@@ -145,7 +145,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-pills.tsx",
+          "path": "src/components/ui/n6k-pills.tsx",
           "type": "registry:ui"
         }
       ]
@@ -164,7 +164,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-toggle.tsx",
+          "path": "src/components/ui/n6k-toggle.tsx",
           "type": "registry:ui"
         }
       ]
@@ -186,7 +186,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-data-table.tsx",
+          "path": "src/components/ui/n6k-data-table.tsx",
           "type": "registry:ui"
         }
       ]
@@ -206,7 +206,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-query.tsx",
+          "path": "src/components/ui/n6k-query.tsx",
           "type": "registry:ui"
         }
       ]
@@ -226,7 +226,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-bar-chart.tsx",
+          "path": "src/components/ui/n6k-bar-chart.tsx",
           "type": "registry:ui"
         }
       ]
@@ -245,7 +245,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-line-chart.tsx",
+          "path": "src/components/ui/n6k-line-chart.tsx",
           "type": "registry:ui"
         }
       ]
@@ -265,7 +265,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-pie-chart.tsx",
+          "path": "src/components/ui/n6k-pie-chart.tsx",
           "type": "registry:ui"
         }
       ]
@@ -284,7 +284,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-scatter-chart.tsx",
+          "path": "src/components/ui/n6k-scatter-chart.tsx",
           "type": "registry:ui"
         }
       ]
@@ -304,7 +304,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-histogram.tsx",
+          "path": "src/components/ui/n6k-histogram.tsx",
           "type": "registry:ui"
         }
       ]
@@ -324,7 +324,7 @@
       ],
       "files": [
         {
-          "path": "ui/n6k-vega-chart.tsx",
+          "path": "src/components/ui/n6k-vega-chart.tsx",
           "type": "registry:ui"
         }
       ]

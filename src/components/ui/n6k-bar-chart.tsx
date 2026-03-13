@@ -15,6 +15,29 @@ import {
 type Estimator = "mean" | "sum" | "count" | "median" | "min" | "max";
 type ErrorBar = "ci" | "sd" | "se" | "pi";
 
+/**
+ * Bar chart with aggregation, error bars, dodge, and hue support.
+ * @param props.table - DuckDB table name as the data source.
+ * @param props.query - SQL query as the data source (mutually exclusive with table).
+ * @param props.x - Field or expression mapped to the x-axis.
+ * @param props.y - Field or expression mapped to the y-axis.
+ * @param props.y2 - Optional secondary y field for range bars.
+ * @param props.hue - Field used for color grouping.
+ * @param props.stack - Stack mode: true for stacked, "normalize" for 100% stacked.
+ * @param props.aggregate - Vega-Lite aggregate transform applied to y.
+ * @param props.xOffset - Field used for x-axis sub-grouping.
+ * @param props.estimator - Statistical estimator for aggregate mode (mean, sum, count, median, min, max).
+ * @param props.errorbar - Error bar type displayed in aggregate mode (ci, sd, se, pi).
+ * @param props.orient - Bar orientation: "v" for vertical, "h" for horizontal.
+ * @param props.dodge - Whether to dodge (side-by-side) grouped bars.
+ * @param props.order - Custom sort order for x-axis categories.
+ * @param props.hueOrder - Custom sort order for hue categories.
+ * @param props.palette - Array of CSS color strings for the color scale.
+ * @param props.color - Single CSS color applied when no hue is used.
+ * @param props.xTitle - Custom x-axis title.
+ * @param props.yTitle - Custom y-axis title.
+ * @param props.legend - Legend position (left, right, top, bottom, etc.) or "none".
+ */
 export function N6KBarChart({
   table,
   query,

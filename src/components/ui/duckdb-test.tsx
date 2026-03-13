@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react'
 import { useDuckDB } from '@n6k.io/db/react'
 
+/**
+ * DuckDB WASM test component with n6k extension loading and SQL execution.
+ */
 export function DuckdbTest() {
   const { conn, status, error } = useDuckDB()
   const [sql, setSql] = useState("SELECT * FROM n6k('http://127.0.0.1:8000/tables/demo');")

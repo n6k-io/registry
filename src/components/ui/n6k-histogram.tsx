@@ -67,6 +67,18 @@ GROUP BY bin, lo, hi, n_bins${hueGroup}
 ORDER BY bin`;
 }
 
+/**
+ * Histogram with configurable bins, statistical transforms, and hue grouping.
+ * @param props.table - DuckDB table name as the data source.
+ * @param props.query - SQL query as the data source (mutually exclusive with table).
+ * @param props.x - Field or expression to bin along the x-axis.
+ * @param props.stat - Statistic shown on the y-axis: "count", "frequency", "density", or "probability".
+ * @param props.bins - Number of histogram bins.
+ * @param props.binwidth - Fixed bin width (overrides bins).
+ * @param props.binrange - Explicit [min, max] range for binning.
+ * @param props.hue - Field used for color grouping.
+ * @param props.multiple - How grouped histograms overlap: "layer", "dodge", or "stack".
+ */
 export function N6KHistogram({
   table,
   query,

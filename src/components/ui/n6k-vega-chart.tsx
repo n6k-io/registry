@@ -3,6 +3,12 @@ import { useQuery } from "@n6k.io/db/react";
 import { useInterpolate } from "@n6k.io/ui";
 import { resolveDataSource, useVegaChart } from "@/lib/n6k-chart-utils";
 
+/**
+ * Raw Vega-Lite spec renderer with DuckDB data source.
+ * @param props.table - DuckDB table name as the data source.
+ * @param props.query - SQL query as the data source (mutually exclusive with table).
+ * @param props.spec - Vega-Lite specification object (data is injected automatically).
+ */
 export function N6KVegaChart({
   table,
   query,

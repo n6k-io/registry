@@ -31,6 +31,13 @@ function arrowToVegaType(typeId: number): "temporal" | "quantitative" | "nominal
   }
 }
 
+/**
+ * Infers a Vega-Lite type string from an Arrow schema field and its chart role.
+ * @param schema - Arrow schema to look up the field in.
+ * @param fieldName - Name of the field in the schema.
+ * @param role - Semantic role of the field (x, y, hue, etc.).
+ * @returns Vega-Lite type string: "temporal", "quantitative", "nominal", or "ordinal".
+ */
 export function inferType(
   schema: Schema<any> | undefined,
   fieldName: string,
@@ -49,6 +56,11 @@ export function inferType(
 
 // --- SQL expression detection ---
 
+/**
+ * Detects whether a string is a SQL expression (vs. a plain column name).
+ * @param s - String to test.
+ * @returns True if the string contains characters beyond a simple identifier.
+ */
 export function isExpression(s: string): boolean {
   return !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(s);
 }
@@ -59,12 +71,22 @@ export type DataSourceProps =
   | { table: string; query?: never }
   | { query: string; table?: never };
 
+/**
+ * Resolves a table name or query prop into a full SELECT statement.
+ * @param props - Object with either a table or query property.
+ * @returns SQL query string.
+ */
 export function resolveDataSource(props: { table?: string; query?: string }): string {
   if (props.query) return props.query;
   if (props.table) return `SELECT * FROM ${props.table}`;
   throw new Error("Either table or query must be provided");
 }
 
+/**
+ * Resolves a data source into a SQL fragment suitable for use in a FROM clause.
+ * @param props - Object with either a table or query property.
+ * @returns Table name or wrapped subquery alias.
+ */
 export function resolveSourceForSQL(props: { table?: string; query?: string }): string {
   if (props.table) return props.table;
   if (props.query) return `(${props.query}) AS _src`;
@@ -73,6 +95,12 @@ export function resolveSourceForSQL(props: { table?: string; query?: string }): 
 
 // --- Query builder ---
 
+/**
+ * Builds a SELECT query that aliases expression fields for chart consumption.
+ * @param source - Base SQL source (table name or SELECT statement).
+ * @param fields - Map of chart roles to field names or SQL expressions.
+ * @returns Object with the generated SQL and a role-to-field-name map.
+ */
 export function buildChartQuery(
   source: string,
   fields: Record<string, string | undefined>,
@@ -111,6 +139,13 @@ function resolveSourceForWrapping(baseSQL: string): string {
 
 // --- Shared Vega chart hook ---
 
+/**
+ * React hook that renders a Vega-Lite spec into a container element.
+ * @param spec - Vega-Lite specification (without data).
+ * @param rows - Data rows to inject into the spec.
+ * @param status - Query status string ("ready" triggers render).
+ * @param containerRef - React ref to the target DOM element.
+ */
 export function useVegaChart(
   spec: Record<string, unknown>,
   rows: Record<string, unknown>[],
@@ -144,6 +179,12 @@ export function useVegaChart(
 
 // --- Shared chart data hook ---
 
+/**
+ * React hook that resolves a data source, builds a query, and returns chart-ready rows.
+ * @param props - Data source props (table or query).
+ * @param fields - Map of chart roles to field names or SQL expressions.
+ * @returns Object with rows, status, error, schema, and fieldMap.
+ */
 export function useChartData(
   props: { table?: string; query?: string },
   fields: Record<string, string | undefined>,
@@ -174,6 +215,13 @@ export function useChartData(
 
 // --- Resolve field name (handles expression aliasing) ---
 
+/**
+ * Resolves a field name through the field map, falling back to the original name.
+ * @param fieldMap - Map of chart roles to resolved field names.
+ * @param role - Chart role to look up.
+ * @param originalField - Original field name or expression.
+ * @returns Resolved field name or undefined.
+ */
 export function resolveField(
   fieldMap: Record<string, string>,
   role: string,
@@ -185,6 +233,12 @@ export function resolveField(
 
 // --- Temporal axis config ---
 
+/**
+ * Determines the appropriate date format for a temporal axis based on data range.
+ * @param rows - Data rows containing the temporal field.
+ * @param fieldName - Name of the temporal field.
+ * @returns Vega-Lite axis config object with a format string.
+ */
 export function temporalAxisConfig(
   rows: Record<string, unknown>[],
   fieldName: string,
@@ -226,6 +280,16 @@ export function temporalAxisConfig(
 type Estimator = "mean" | "sum" | "count" | "median" | "min" | "max";
 type ErrorBar = "ci" | "sd" | "se" | "pi";
 
+/**
+ * Builds a SQL aggregate query with optional error bar columns.
+ * @param source - SQL FROM clause source.
+ * @param x - Field or expression for the grouping axis.
+ * @param y - Field or expression to aggregate.
+ * @param estimator - Statistical estimator (mean, sum, count, median, min, max).
+ * @param errorbar - Error bar type (ci, sd, se, pi) or null/undefined.
+ * @param hue - Optional field for color sub-grouping.
+ * @returns Object with the SQL string and a hasError boolean.
+ */
 export function buildAggregateQuery(
   source: string,
   x: string,
