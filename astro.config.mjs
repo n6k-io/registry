@@ -2,8 +2,8 @@ import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import { execSync } from "child_process";
-import { readFileSync } from "fs";
 import { resolve } from "path";
+import { build as viteBuild } from "vite";
 
 function extractDocs() {
   return {
@@ -27,42 +27,51 @@ function copyWasmExtensions() {
   };
 }
 
-function bundleN6kWorkers() {
-  const workerEntries = {
-    "_n6k/workers/fetch-worker": resolve("node_modules/@n6k.io/db/src/fetch-worker.js"),
-    "_n6k/workers/n6k-duckdb-worker": resolve("node_modules/@n6k.io/db/src/n6k-duckdb-worker.js"),
-  };
+function n6kWorkerPlugin() {
+  let isBuild = false;
 
   return {
-    name: "bundle-n6k-workers",
-    hooks: {
-      "astro:config:setup": ({ updateConfig }) => {
-        updateConfig({
-          vite: {
-            build: {
-              rollupOptions: {
-                input: workerEntries,
-              },
-            },
-            plugins: [
-              {
-                name: "n6k-workers-dev",
-                configureServer(server) {
-                  // In dev, serve the worker source files at their expected URLs
-                  for (const [urlPath, filePath] of Object.entries(workerEntries)) {
-                    server.middlewares.use("/" + urlPath + ".js", (_req, res) => {
-                      res.setHeader("Content-Type", "application/javascript");
-                      res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-                      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-                      res.end(readFileSync(filePath, "utf8"));
-                    });
-                  }
-                },
-              },
-            ],
+    name: "n6k-worker-iife",
+    enforce: "pre",
+    configResolved(config) {
+      isBuild = config.command === "build";
+    },
+    async load(id) {
+      if (!id.includes("/workers/") || !id.endsWith("?url")) return;
+      if (!id.includes("@n6k.io/db") && !id.includes("n6k")) return;
+
+      const filePath = id.replace(/\?url$/, "");
+
+      const result = await viteBuild({
+        configFile: false,
+        logLevel: "silent",
+        build: {
+          write: false,
+          lib: {
+            entry: filePath,
+            name: "worker",
+            formats: ["iife"],
           },
+          rollupOptions: {
+            output: { inlineDynamicImports: true },
+          },
+        },
+      });
+
+      const output = Array.isArray(result) ? result[0] : result;
+      const code = output.output[0].code;
+
+      if (isBuild) {
+        const fileName = filePath.split("/").pop().replace(/\.ts$/, ".js");
+        const refId = this.emitFile({
+          type: "asset",
+          name: fileName,
+          source: code,
         });
-      },
+        return `export default import.meta.ROLLUP_FILE_URL_${refId}`;
+      }
+
+      return `export default URL.createObjectURL(new Blob([${JSON.stringify(code)}], { type: "application/javascript" }))`;
     },
   };
 }
@@ -70,9 +79,9 @@ function bundleN6kWorkers() {
 export default defineConfig({
   srcDir: "./site",
   outDir: "./dist",
-  integrations: [extractDocs(), copyWasmExtensions(), bundleN6kWorkers(), react()],
+  integrations: [extractDocs(), copyWasmExtensions(), react()],
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), n6kWorkerPlugin()],
     resolve: {
       alias: {
         "@": resolve("src"),
