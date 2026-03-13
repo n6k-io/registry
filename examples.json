@@ -1,0 +1,9 @@
+{
+  "n6k-page": [
+    {
+      "title": "Basic",
+      "description": "A page layout wrapper with document title interpolation.",
+      "path": "./examples/n6k-page/page-01.tsx"
+    }
+  ]
+}

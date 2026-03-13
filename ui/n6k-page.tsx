@@ -2,6 +2,12 @@ import { useEffect } from "react";
 import { useInterpolate } from "@n6k.io/ui";
 import { cn } from "@/lib/utils";
 
+/**
+ * Page layout wrapper that sets the document title via binding interpolation.
+ * @param props.title - Document title string (supports binding interpolation).
+ * @param props.className - Additional CSS classes for the page container.
+ * @param props.children - Page content.
+ */
 export function N6KPage({
   title,
   className,

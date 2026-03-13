@@ -28,6 +28,15 @@ interface DataTableProps {
   className?: string;
 }
 
+/**
+ * Pure data table with virtualized rows and sortable columns.
+ * @param props.columns - Column name strings.
+ * @param props.rows - Array of row objects keyed by column name.
+ * @param props.maxHeight - Maximum height of the scrollable area (number in px or CSS string).
+ * @param props.showRowCount - Whether to display the total row count footer.
+ * @param props.showRowIndex - Whether to prepend a row-index column.
+ * @param props.className - Additional CSS classes for the root container.
+ */
 export function DataTable({
   columns,
   rows,
@@ -177,6 +186,16 @@ export function DataTable({
 
 // --- N6KDataTable: table name + optional WHERE, queries via DuckDB ---
 
+/**
+ * DuckDB-powered data table with interactive WHERE clause filtering.
+ * @param props.table - DuckDB table name to query.
+ * @param props.cols - Column names to select (defaults to all).
+ * @param props.where - Initial WHERE clause filter expression.
+ * @param props.maxHeight - Maximum height of the scrollable area (number in px or CSS string).
+ * @param props.showRowCount - Whether to display the total row count footer.
+ * @param props.showRowIndex - Whether to prepend a row-index column.
+ * @param props.className - Additional CSS classes for the root container.
+ */
 export function N6KDataTable({
   table: tableName,
   cols,

@@ -23,6 +23,15 @@ function SQLValue({
   return <>{format ? format(raw) : String(raw)}</>;
 }
 
+/**
+ * KPI metric display with optional SQL-driven value and delta indicator.
+ * @param props.label - Display label for the metric.
+ * @param props.value - Static text or a SQL SELECT query whose first column/row is shown.
+ * @param props.valueFormat - Optional formatter applied to the resolved value.
+ * @param props.delta - Static text or SQL query for the delta indicator.
+ * @param props.deltaFormat - Optional formatter applied to the resolved delta.
+ * @param props.className - Additional CSS classes for the root container.
+ */
 export function N6KMetric({
   label,
   value,

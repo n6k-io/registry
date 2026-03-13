@@ -1,0 +1,164 @@
+---
+import Base from "../../layouts/Base.astro";
+import { CodeViewer } from "../../components/code-viewer";
+import { ExampleRenderer } from "../../components/example-renderer";
+import { readFileSync, readdirSync, existsSync } from "fs";
+import { join, basename } from "path";
+
+export function getStaticPaths() {
+  const dir = join(process.cwd(), "public", "r");
+  const files = readdirSync(dir).filter(
+    (f) => f.endsWith(".json") && f !== "registry.json"
+  );
+  return files.map((f) => ({
+    params: { name: f.replace(".json", "") },
+  }));
+}
+
+const { name } = Astro.params;
+
+const registry = JSON.parse(
+  readFileSync(join(process.cwd(), "public", "r", "registry.json"), "utf-8")
+);
+
+const component = JSON.parse(
+  readFileSync(join(process.cwd(), "public", "r", `${name}.json`), "utf-8")
+);
+
+const installCmd = `bunx shadcn@latest add @n6k/${name}`;
+
+// Load examples
+const examplesPath = join(process.cwd(), "examples.json");
+const examplesMap = existsSync(examplesPath)
+  ? JSON.parse(readFileSync(examplesPath, "utf-8"))
+  : {};
+
+type ExampleEntry = { title: string; description?: string; path: string };
+const exampleEntries: ExampleEntry[] = examplesMap[name] ?? [];
+
+const examples = exampleEntries.map((entry) => {
+  const absPath = join(process.cwd(), entry.path);
+  const globPath = entry.path.replace("./examples/", "../../examples/");
+  return {
+    title: entry.title,
+    description: entry.description,
+    globPath,
+    filename: basename(entry.path),
+    code: existsSync(absPath) ? readFileSync(absPath, "utf-8") : "",
+  };
+});
+
+const heroExample = examples[0];
+const additionalExamples = examples.slice(1);
+---
+
+<Base title={`${component.title || name} - ${registry.name}`}>
+  <a
+    href="/"
+    class="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 inline-flex items-center gap-1 mb-6"
+  >
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path d="M15 19l-7-7 7-7" />
+    </svg>
+    Back
+  </a>
+
+  <h1 class="text-2xl font-semibold mb-1">{component.title || name}</h1>
+  <p class="text-neutral-500 dark:text-neutral-500 text-sm mb-6">{component.description}</p>
+
+  {heroExample && (
+    <section class="mb-8">
+      <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+        <div class="bg-neutral-50 dark:bg-neutral-900">
+          <ExampleRenderer examplePath={heroExample.globPath} client:load />
+        </div>
+        <div class="flex items-center justify-end px-4 py-2 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
+          <CodeViewer code={heroExample.code} filename={heroExample.filename} client:load />
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="mb-8">
+    <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Install</h2>
+    <div class="relative group">
+      <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto"><code id="install-cmd">{installCmd}</code></pre>
+      <button
+        id="copy-btn"
+        class="absolute top-2 right-2 p-1.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:hover:text-neutral-200"
+        aria-label="Copy install command"
+      >
+        <svg id="copy-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+        </svg>
+        <svg id="check-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  {(component.dependencies?.length > 0) && (
+    <section class="mb-8">
+      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Dependencies</h2>
+      <div class="flex gap-2 flex-wrap">
+        {component.dependencies.map((dep: string) => (
+          <span class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400">
+            {dep}
+          </span>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {(component.registryDependencies?.length > 0) && (
+    <section class="mb-8">
+      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Registry Dependencies</h2>
+      <div class="flex gap-2 flex-wrap">
+        {component.registryDependencies.map((dep: string) => (
+          <span class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400">
+            {dep}
+          </span>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {additionalExamples.length > 0 && (
+    <section class="mb-8">
+      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Examples</h2>
+      <div class="space-y-6">
+        {additionalExamples.map((ex: any) => (
+          <div>
+            <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-200 mb-1">{ex.title}</h3>
+            {ex.description && (
+              <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-3">{ex.description}</p>
+            )}
+            <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+              <div class="bg-neutral-50 dark:bg-neutral-900">
+                <ExampleRenderer examplePath={ex.globPath} client:load />
+              </div>
+              <div class="flex items-center justify-end px-4 py-2 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
+                <CodeViewer code={ex.code} filename={ex.filename} client:load />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <script is:inline>
+    document.getElementById("copy-btn").addEventListener("click", () => {
+      const cmd = document.getElementById("install-cmd").textContent;
+      navigator.clipboard.writeText(cmd).then(() => {
+        document.getElementById("copy-icon").classList.add("hidden");
+        document.getElementById("check-icon").classList.remove("hidden");
+        setTimeout(() => {
+          document.getElementById("copy-icon").classList.remove("hidden");
+          document.getElementById("check-icon").classList.add("hidden");
+        }, 2000);
+      });
+    });
+  </script>
+</Base>
