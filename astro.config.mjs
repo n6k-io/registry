@@ -15,27 +15,26 @@ function extractDocs() {
   };
 }
 
+function copyWasmExtensions() {
+  return {
+    name: "copy-wasm-extensions",
+    hooks: {
+      "astro:config:setup": () => {
+        execSync("bun scripts/copy-wasm-extensions.ts", { stdio: "inherit" });
+      },
+    },
+  };
+}
+
 export default defineConfig({
   srcDir: "./site",
   outDir: "./dist",
-  integrations: [extractDocs(), react()],
+  integrations: [extractDocs(), copyWasmExtensions(), react()],
   vite: {
     plugins: [tailwindcss()],
     resolve: {
       alias: {
         "@": resolve("src"),
-      },
-    },
-    server: {
-      headers: {
-        "Cross-Origin-Opener-Policy": "same-origin",
-        "Cross-Origin-Embedder-Policy": "require-corp",
-      },
-    },
-    preview: {
-      headers: {
-        "Cross-Origin-Opener-Policy": "same-origin",
-        "Cross-Origin-Embedder-Policy": "require-corp",
       },
     },
     optimizeDeps: {

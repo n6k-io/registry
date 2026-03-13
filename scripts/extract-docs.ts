@@ -1,4 +1,9 @@
-import { Project, SyntaxKind, type FunctionDeclaration, type JSDoc } from "ts-morph";
+import {
+  Project,
+  SyntaxKind,
+  type FunctionDeclaration,
+  type JSDoc,
+} from "ts-morph";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
@@ -44,12 +49,15 @@ for (const item of registry.items) {
     // Determine import path: src/components/ui/foo.tsx → @/components/ui/foo
     const importPath = `@/${filePath.replace("src/", "").replace(/\.tsx?$/, "")}`;
 
-    const exportedFunctions = sourceFile.getFunctions().filter((f) => f.isExported());
+    const exportedFunctions = sourceFile
+      .getFunctions()
+      .filter((f) => f.isExported());
 
     for (const fn of exportedFunctions) {
       const fnName = fn.getName() || "default";
       const jsDocs = fn.getJsDocs();
-      const description = jsDocs.length > 0 ? jsDocs[0].getDescription().trim() : "";
+      const description =
+        jsDocs.length > 0 ? jsDocs[0].getDescription().trim() : "";
 
       // Extract @param descriptions from JSDoc
       const paramDescriptions = new Map<string, string>();
@@ -126,4 +134,6 @@ function cleanTypeText(type: string): string {
 }
 
 writeFileSync(join(root, "public", "docs.json"), JSON.stringify(docs, null, 2));
-console.log(`Generated public/docs.json with ${Object.keys(docs).length} components`);
+console.log(
+  `Generated public/docs.json with ${Object.keys(docs).length} components`,
+);

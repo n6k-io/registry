@@ -12,5 +12,19 @@
       "description": "KPI cards with values driven by DuckDB SQL queries.",
       "path": "./examples/n6k-metric/metric-01.tsx"
     }
+  ],
+  "n6k-bar-chart": [
+    {
+      "title": "Temperature Range",
+      "description": "Bar chart showing daily temperature range with y/y2 range bars.",
+      "path": "./examples/n6k-bar-chart/bar-chart-01.tsx"
+    }
+  ],
+  "vega-bar-chart": [
+    {
+      "title": "Precipitation by Month",
+      "description": "Stacked bar chart with hue grouping using the Field-based API.",
+      "path": "./examples/vega-bar-chart/bar-chart-01.tsx"
+    }
   ]
 }

@@ -10,11 +10,10 @@ export function ExampleProviders({
 }) {
   return (
     <DuckDBProvider
-      databases={{ db: "https://demo.n6k.app/_n6k" }}
+      databases={{ db: "http://localhost:8000/_n6k" }}
+      // databases={{ db: "https://demo.n6k.app/_n6k" }}
     >
-      <BindingProvider defaults={bindings}>
-        {children}
-      </BindingProvider>
+      <BindingProvider defaults={bindings}>{children}</BindingProvider>
     </DuckDBProvider>
   );
 }
