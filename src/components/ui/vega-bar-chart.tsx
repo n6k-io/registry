@@ -1,31 +1,29 @@
 import { useRef, useMemo } from "react";
-import { useQuery } from "@n6k.io/db/react";
-import { useInterpolate } from "@n6k.io/ui";
 import {
-  useChartData,
   useVegaChart,
   inferType,
-  resolveField,
-  resolveSourceForSQL,
-  buildAggregateQuery,
   temporalAxisConfig,
   type LegendOrient,
 } from "@/lib/n6k-chart-utils";
+import {
+  useResolveData,
+  isColumnName,
+  type Field,
+} from "@/lib/use-resolve-data";
 
 type Estimator = "mean" | "sum" | "count" | "median" | "min" | "max";
 type ErrorBar = "ci" | "sd" | "se" | "pi";
 
 /**
- * Bar chart with aggregation, error bars, dodge, and hue support.
- * @param props.table - DuckDB table name as the data source.
- * @param props.query - SQL query as the data source (mutually exclusive with table).
- * @param props.x - Field or expression mapped to the x-axis.
- * @param props.y - Field or expression mapped to the y-axis.
+ * Bar chart powered by Vega-Lite with a Field-based API.
+ * @param props.data - DuckDB table or view reference. Required when fields are columns/expressions.
+ * @param props.x - Field for the x-axis (column name, SQL expression, or subquery).
+ * @param props.y - Field for the y-axis.
  * @param props.y2 - Optional secondary y field for range bars.
  * @param props.hue - Field used for color grouping.
+ * @param props.xOffset - Field used for x-axis sub-grouping.
  * @param props.stack - Stack mode: true for stacked, "normalize" for 100% stacked.
  * @param props.aggregate - Vega-Lite aggregate transform applied to y.
- * @param props.xOffset - Field used for x-axis sub-grouping.
  * @param props.estimator - Statistical estimator for aggregate mode (mean, sum, count, median, min, max).
  * @param props.errorbar - Error bar type displayed in aggregate mode (ci, sd, se, pi).
  * @param props.orient - Bar orientation: "v" for vertical, "h" for horizontal.
@@ -36,39 +34,17 @@ type ErrorBar = "ci" | "sd" | "se" | "pi";
  * @param props.color - Single CSS color applied when no hue is used.
  * @param props.xTitle - Custom x-axis title.
  * @param props.yTitle - Custom y-axis title.
- * @param props.legend - Legend position (left, right, top, bottom, etc.) or "none".
+ * @param props.legend - Legend position or "none".
  */
-export function N6KBarChart({
-  table,
-  query,
-  x,
-  y,
-  y2,
-  hue,
-  stack,
-  aggregate,
-  xOffset,
-  estimator,
-  errorbar,
-  orient,
-  dodge,
-  order,
-  hueOrder,
-  palette,
-  color,
-  xTitle,
-  yTitle,
-  legend,
-}: {
-  table?: string;
-  query?: string;
-  x: string;
-  y: string;
-  y2?: string;
-  hue?: string;
+export function VegaBarChart(props: {
+  data?: string;
+  x: Field;
+  y: Field;
+  y2?: Field;
+  hue?: Field;
+  xOffset?: Field;
   stack?: boolean | "normalize";
   aggregate?: string;
-  xOffset?: string;
   estimator?: Estimator;
   errorbar?: ErrorBar | null;
   orient?: "v" | "h";
@@ -81,66 +57,28 @@ export function N6KBarChart({
   yTitle?: string;
   legend?: LegendOrient;
 }) {
-  const isAggregateMode = !!(estimator || errorbar);
-
+  const isAggregateMode = !!(props.estimator || props.errorbar);
   if (isAggregateMode) {
     return (
-      <AggregateBarChart
-        table={table}
-        query={query}
-        x={x}
-        y={y}
-        hue={hue}
-        estimator={estimator || "mean"}
-        errorbar={errorbar}
-        orient={orient}
-        dodge={dodge}
-        order={order}
-        hueOrder={hueOrder}
-        palette={palette}
-        color={color}
-        stack={stack}
-        xTitle={xTitle}
-        yTitle={yTitle}
-        legend={legend}
-      />
+      <AggregateBarChart {...props} estimator={props.estimator || "mean"} />
     );
   }
-
-  return (
-    <SimpleBarChart
-      table={table}
-      query={query}
-      x={x}
-      y={y}
-      y2={y2}
-      hue={hue}
-      stack={stack}
-      aggregate={aggregate}
-      xOffset={xOffset}
-      orient={orient}
-      dodge={dodge}
-      order={order}
-      hueOrder={hueOrder}
-      palette={palette}
-      color={color}
-      xTitle={xTitle}
-      yTitle={yTitle}
-      legend={legend}
-    />
-  );
+  return <SimpleBarChart {...props} />;
 }
 
+// ---------------------------------------------------------------------------
+// Simple (non-aggregate) bar chart
+// ---------------------------------------------------------------------------
+
 function SimpleBarChart({
-  table,
-  query,
+  data,
   x,
   y,
   y2,
   hue,
+  xOffset,
   stack,
   aggregate,
-  xOffset,
   orient,
   dodge,
   order,
@@ -151,15 +89,14 @@ function SimpleBarChart({
   yTitle,
   legend,
 }: {
-  table?: string;
-  query?: string;
-  x: string;
-  y: string;
-  y2?: string;
-  hue?: string;
+  data?: string;
+  x: Field;
+  y: Field;
+  y2?: Field;
+  hue?: Field;
+  xOffset?: Field;
   stack?: boolean | "normalize";
   aggregate?: string;
-  xOffset?: string;
   orient?: "v" | "h";
   dodge?: boolean;
   order?: string[];
@@ -171,37 +108,28 @@ function SimpleBarChart({
   legend?: LegendOrient;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { rows, status, error, schema, fieldMap } = useChartData(
-    { table, query },
-    { x, y, y2, hue, xOffset },
-  );
 
-  const xField = resolveField(fieldMap, "x", x)!;
-  const yField = resolveField(fieldMap, "y", y)!;
-  const y2Field = y2 ? resolveField(fieldMap, "y2", y2) : undefined;
-  const hueField = hue ? resolveField(fieldMap, "hue", hue) : undefined;
-  const xOffsetField = xOffset
-    ? resolveField(fieldMap, "xOffset", xOffset)
-    : undefined;
+  const { rows, schema, status, error } = useResolveData({
+    data,
+    dimensions: { x, y, y2, hue, xOffset },
+  });
 
-  const shouldDodge = dodge ?? (!!hueField && !stack);
+  const shouldDodge = dodge ?? (!!hue && !stack);
 
   const spec = useMemo(() => {
-    const xType = inferType(schema, xField, "x");
-    const yType = inferType(schema, yField, "y");
+    const xType = inferType(schema, "x", "x");
+    const yType = inferType(schema, "y", "y");
 
     const xEnc: Record<string, unknown> = {
-      field: xField,
+      field: "x",
       type: xType,
       ...(xTitle ? { title: xTitle } : {}),
-      ...(xType === "temporal"
-        ? { axis: temporalAxisConfig(rows, xField) }
-        : {}),
+      ...(xType === "temporal" ? { axis: temporalAxisConfig(rows, "x") } : {}),
       ...(order ? { sort: order } : {}),
     };
 
     const yEnc: Record<string, unknown> = {
-      field: yField,
+      field: "y",
       type: yType,
       ...(yTitle ? { title: yTitle } : {}),
       ...(aggregate ? { aggregate } : {}),
@@ -213,44 +141,43 @@ function SimpleBarChart({
       ? { y: xEnc, x: yEnc }
       : { x: xEnc, y: yEnc };
 
-    if (y2Field) {
-      const y2Enc = { field: y2Field };
-      encoding[isHorizontal ? "x2" : "y2"] = y2Enc;
+    if (y2) {
+      encoding[isHorizontal ? "x2" : "y2"] = { field: "y2" };
     }
 
-    if (hueField) {
+    if (hue) {
       const colorEnc: Record<string, unknown> = {
-        field: hueField,
+        field: "hue",
         type: "nominal",
         ...(hueOrder ? { sort: hueOrder } : {}),
-        ...(legend ? { legend: { orient: legend } } : {}),
+        ...(legend === "none"
+          ? { legend: null }
+          : legend
+            ? { legend: { orient: legend } }
+            : {}),
       };
-      if (palette) {
-        colorEnc.scale = { range: palette };
-      }
+      if (palette) colorEnc.scale = { range: palette };
       encoding.color = colorEnc;
     } else if (color) {
       encoding.color = { value: color };
     }
 
-    const effectiveXOffset =
-      xOffsetField || (shouldDodge && hueField ? hueField : undefined);
+    const effectiveXOffset = xOffset
+      ? "xOffset"
+      : shouldDodge && hue
+        ? "hue"
+        : undefined;
     if (effectiveXOffset) {
       const offsetKey = isHorizontal ? "yOffset" : "xOffset";
       encoding[offsetKey] = { field: effectiveXOffset, type: "nominal" };
     }
 
-    return {
-      mark: { type: "bar" as const },
-      encoding,
-    };
+    return { mark: { type: "bar" as const }, encoding };
   }, [
     schema,
-    xField,
-    yField,
-    y2Field,
-    hueField,
-    xOffsetField,
+    y2,
+    hue,
+    xOffset,
     stack,
     aggregate,
     orient,
@@ -259,6 +186,9 @@ function SimpleBarChart({
     hueOrder,
     palette,
     color,
+    xTitle,
+    yTitle,
+    legend,
     rows,
   ]);
 
@@ -273,9 +203,54 @@ function SimpleBarChart({
   return <div ref={containerRef} className="w-full" />;
 }
 
+// ---------------------------------------------------------------------------
+// Aggregate bar chart (estimator / errorbar)
+// ---------------------------------------------------------------------------
+
+function estimatorToSQL(estimator: Estimator, yField: string): string {
+  const col = isColumnName(yField) ? `"${yField}"` : `(${yField})`;
+  switch (estimator) {
+    case "mean":
+      return `AVG(${col})`;
+    case "sum":
+      return `SUM(${col})`;
+    case "count":
+      return `COUNT(${col})`;
+    case "median":
+      return `MEDIAN(${col})`;
+    case "min":
+      return `MIN(${col})`;
+    case "max":
+      return `MAX(${col})`;
+  }
+}
+
+function errorbarToSQL(
+  errorbar: ErrorBar,
+  estimator: Estimator,
+  yField: string,
+): { lo: string; hi: string } {
+  const col = isColumnName(yField) ? `"${yField}"` : `(${yField})`;
+  const agg = estimatorToSQL(estimator, yField);
+  switch (errorbar) {
+    case "sd":
+      return { lo: `${agg} - STDDEV(${col})`, hi: `${agg} + STDDEV(${col})` };
+    case "se":
+      return {
+        lo: `${agg} - STDDEV(${col}) / SQRT(COUNT(${col}))`,
+        hi: `${agg} + STDDEV(${col}) / SQRT(COUNT(${col}))`,
+      };
+    case "ci":
+    case "pi":
+      return {
+        lo: `PERCENTILE_CONT(0.025) WITHIN GROUP (ORDER BY ${col})`,
+        hi: `PERCENTILE_CONT(0.975) WITHIN GROUP (ORDER BY ${col})`,
+      };
+  }
+}
+
 function AggregateBarChart({
-  table,
-  query,
+  data,
   x,
   y,
   hue,
@@ -292,11 +267,10 @@ function AggregateBarChart({
   yTitle,
   legend,
 }: {
-  table?: string;
-  query?: string;
-  x: string;
-  y: string;
-  hue?: string;
+  data?: string;
+  x: Field;
+  y: Field;
+  hue?: Field;
   estimator: Estimator;
   errorbar?: ErrorBar | null;
   orient?: "v" | "h";
@@ -310,84 +284,88 @@ function AggregateBarChart({
   yTitle?: string;
   legend?: LegendOrient;
 }) {
-  const source = resolveSourceForSQL({ table, query });
-
-  const rawSql = useMemo(
-    () => buildAggregateQuery(source, x, y, estimator, errorbar, hue).sql,
-    [source, x, y, estimator, errorbar, hue],
-  );
-  const hasError = !!errorbar;
-
-  const sql = useInterpolate(rawSql);
-  const { rows, status, error, schema } = useQuery(sql);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const xFieldName = "__x";
-  const hueFieldName = hue ? "__hue" : undefined;
-  const shouldDodge = dodge ?? (!!hueFieldName && !stack);
+  const dimensions: Record<string, string> = { x };
+  if (hue) dimensions.hue = hue;
+
+  const measures: Record<string, string> = {
+    y: estimatorToSQL(estimator, y),
+  };
+  if (errorbar) {
+    const { lo, hi } = errorbarToSQL(errorbar, estimator, y);
+    measures.error_lo = lo;
+    measures.error_hi = hi;
+  }
+
+  const { rows, schema, status, error } = useResolveData({
+    data,
+    dimensions,
+    measures,
+  });
+
+  const shouldDodge = dodge ?? (!!hue && !stack);
+  const hasError = !!errorbar;
+
+  const defaultYLabel = estimator === "count" ? "count" : `${estimator}(${y})`;
 
   const spec = useMemo(() => {
-    const xType = inferType(schema, xFieldName, "x");
+    const xType = inferType(schema, "x", "x");
 
     const xEnc: Record<string, unknown> = {
-      field: xFieldName,
+      field: "x",
       type: xType,
       title: xTitle || x,
-      ...(xType === "temporal"
-        ? { axis: temporalAxisConfig(rows, xFieldName) }
-        : {}),
+      ...(xType === "temporal" ? { axis: temporalAxisConfig(rows, "x") } : {}),
       ...(order ? { sort: order } : {}),
     };
 
-    const defaultYLabel =
-      estimator === "count" ? "count" : `${estimator}(${y})`;
     const yEnc: Record<string, unknown> = {
-      field: "__value",
+      field: "y",
       type: "quantitative",
       title: yTitle || defaultYLabel,
       ...(stack !== undefined ? { stack } : {}),
     };
 
     const isHorizontal = orient === "h";
-
     const barEncoding: Record<string, unknown> = isHorizontal
       ? { y: xEnc, x: yEnc }
       : { x: xEnc, y: yEnc };
 
-    if (hueFieldName) {
+    if (hue) {
       const colorEnc: Record<string, unknown> = {
-        field: hueFieldName,
+        field: "hue",
         type: "nominal",
         title: hue,
         ...(hueOrder ? { sort: hueOrder } : {}),
-        ...(legend ? { legend: { orient: legend } } : {}),
+        ...(legend === "none"
+          ? { legend: null }
+          : legend
+            ? { legend: { orient: legend } }
+            : {}),
       };
-      if (palette) {
-        colorEnc.scale = { range: palette };
-      }
+      if (palette) colorEnc.scale = { range: palette };
       barEncoding.color = colorEnc;
     } else if (color) {
       barEncoding.color = { value: color };
     }
 
-    if (shouldDodge && hueFieldName) {
+    if (shouldDodge && hue) {
       const offsetKey = isHorizontal ? "yOffset" : "xOffset";
-      barEncoding[offsetKey] = { field: hueFieldName, type: "nominal" };
+      barEncoding[offsetKey] = { field: "hue", type: "nominal" };
     }
 
     if (!hasError) {
       return { mark: { type: "bar" as const }, encoding: barEncoding };
     }
 
-    const errorEncoding: Record<string, unknown> = {
-      ...barEncoding,
-    };
+    const errorEncoding: Record<string, unknown> = { ...barEncoding };
     if (isHorizontal) {
-      errorEncoding.x = { field: "__error_lo", type: "quantitative" };
-      errorEncoding.x2 = { field: "__error_hi" };
+      errorEncoding.x = { field: "error_lo", type: "quantitative" };
+      errorEncoding.x2 = { field: "error_hi" };
     } else {
-      errorEncoding.y = { field: "__error_lo", type: "quantitative" };
-      errorEncoding.y2 = { field: "__error_hi" };
+      errorEncoding.y = { field: "error_lo", type: "quantitative" };
+      errorEncoding.y2 = { field: "error_hi" };
     }
 
     return {
@@ -401,8 +379,7 @@ function AggregateBarChart({
     };
   }, [
     schema,
-    xFieldName,
-    hueFieldName,
+    hue,
     hasError,
     orient,
     shouldDodge,
@@ -411,6 +388,10 @@ function AggregateBarChart({
     palette,
     color,
     stack,
+    xTitle,
+    yTitle,
+    legend,
+    defaultYLabel,
     rows,
   ]);
 

@@ -26,7 +26,7 @@ export function N6KVegaChart({
   useVegaChart(spec, rows, status, containerRef);
 
   if (status === "loading" || status === "idle") {
-    return <div className="p-4 text-muted-foreground">Loading…</div>;
+    return <div className="text-muted-foreground p-4">Loading…</div>;
   }
 
   if (status === "error") {

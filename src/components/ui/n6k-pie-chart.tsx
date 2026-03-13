@@ -1,7 +1,12 @@
 import { useRef, useMemo } from "react";
 import { useQuery } from "@n6k.io/db/react";
 import { useInterpolate } from "@n6k.io/ui";
-import { useVegaChart, resolveSourceForSQL, isExpression, type LegendOrient } from "@/lib/n6k-chart-utils";
+import {
+  useVegaChart,
+  resolveSourceForSQL,
+  isExpression,
+  type LegendOrient,
+} from "@/lib/n6k-chart-utils";
 
 type Aggregate = "sum" | "count" | "mean";
 
@@ -81,7 +86,7 @@ export function N6KPieChart({
   useVegaChart(spec, rows, status, containerRef);
 
   if (status === "loading" || status === "idle") {
-    return <div className="p-4 text-muted-foreground">Loading…</div>;
+    return <div className="text-muted-foreground p-4">Loading…</div>;
   }
   if (status === "error") {
     return <div className="p-4 text-red-500">{error}</div>;

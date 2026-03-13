@@ -34,9 +34,11 @@ export function N6KPills({
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex flex-wrap items-center gap-2">
       {label && (
-        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        <span className="text-muted-foreground text-sm font-medium">
+          {label}
+        </span>
       )}
       {options.map((option) => {
         const active = current.includes(option);
@@ -49,7 +51,7 @@ export function N6KPills({
               "border",
               active
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-muted/50 text-muted-foreground border-transparent hover:bg-muted",
+                : "bg-muted/50 text-muted-foreground hover:bg-muted border-transparent",
             )}
           >
             {String(option)}

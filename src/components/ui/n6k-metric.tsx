@@ -1,8 +1,14 @@
 import { useQuery } from "@n6k.io/db/react";
+import { useInterpolate } from "@n6k.io/ui";
 import { cn } from "@/lib/utils";
 
 function isSQL(s: string): boolean {
   return s.trimStart().toUpperCase().startsWith("SELECT ");
+}
+
+function resolveScalar(source: string): string {
+  if (isSQL(source)) return source;
+  return `SELECT * FROM ${source} LIMIT 1`;
 }
 
 function SQLValue({
@@ -12,26 +18,21 @@ function SQLValue({
   query: string;
   format?: (v: any) => string;
 }) {
-  const { rows, status } = useQuery(query);
+  const sql = useInterpolate(resolveScalar(query));
+  const { rows, status } = useQuery(sql);
 
   if (status === "loading" || status === "idle") return <>…</>;
   if (status === "error") return <>—</>;
 
-  const raw = rows.length > 0 ? Object.values(rows[0] as Record<string, unknown>)[0] : null;
+  const raw =
+    rows.length > 0
+      ? Object.values(rows[0] as Record<string, unknown>)[0]
+      : null;
   if (raw == null) return <>—</>;
 
   return <>{format ? format(raw) : String(raw)}</>;
 }
 
-/**
- * KPI metric display with optional SQL-driven value and delta indicator.
- * @param props.label - Display label for the metric.
- * @param props.value - Static text or a SQL SELECT query whose first column/row is shown.
- * @param props.valueFormat - Optional formatter applied to the resolved value.
- * @param props.delta - Static text or SQL query for the delta indicator.
- * @param props.deltaFormat - Optional formatter applied to the resolved delta.
- * @param props.className - Additional CSS classes for the root container.
- */
 export function N6KMetric({
   label,
   value,
@@ -47,55 +48,14 @@ export function N6KMetric({
   deltaFormat?: (v: any) => string;
   className?: string;
 }) {
-  const valueIsSQL = isSQL(value);
-  const deltaIsSQL = delta ? isSQL(delta) : false;
-
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <span className="text-muted-foreground text-sm font-medium">{label}</span>
       <span className="text-2xl font-semibold tracking-tight">
-        {valueIsSQL ? <SQLValue query={value} format={valueFormat} /> : value}
+        <SQLValue query={value} format={valueFormat} />
       </span>
-      {delta && (
-        <DeltaDisplay
-          delta={delta}
-          deltaIsSQL={deltaIsSQL}
-          deltaFormat={deltaFormat}
-        />
-      )}
+      {delta && <SQLDelta query={delta} format={deltaFormat} />}
     </div>
-  );
-}
-
-function DeltaDisplay({
-  delta,
-  deltaIsSQL,
-  deltaFormat,
-}: {
-  delta: string;
-  deltaIsSQL: boolean;
-  deltaFormat?: (v: any) => string;
-}) {
-  if (deltaIsSQL) {
-    return <SQLDelta query={delta} format={deltaFormat} />;
-  }
-
-  const numericDelta = parseFloat(delta);
-  const isPositive = !isNaN(numericDelta) && numericDelta > 0;
-  const isNegative = !isNaN(numericDelta) && numericDelta < 0;
-
-  return (
-    <span
-      className={cn(
-        "text-sm font-medium",
-        isPositive && "text-green-600",
-        isNegative && "text-red-600",
-      )}
-    >
-      {isPositive && "▲ "}
-      {isNegative && "▼ "}
-      {delta}
-    </span>
   );
 }
 
@@ -106,12 +66,17 @@ function SQLDelta({
   query: string;
   format?: (v: any) => string;
 }) {
-  const { rows, status } = useQuery(query);
+  const sql = useInterpolate(resolveScalar(query));
+  const { rows, status } = useQuery(sql);
 
-  if (status === "loading" || status === "idle") return <span className="text-sm font-medium">…</span>;
+  if (status === "loading" || status === "idle")
+    return <span className="text-sm font-medium">…</span>;
   if (status === "error") return <span className="text-sm font-medium">—</span>;
 
-  const raw = rows.length > 0 ? Object.values(rows[0] as Record<string, unknown>)[0] : null;
+  const raw =
+    rows.length > 0
+      ? Object.values(rows[0] as Record<string, unknown>)[0]
+      : null;
   if (raw == null) return <span className="text-sm font-medium">—</span>;
 
   const num = Number(raw);

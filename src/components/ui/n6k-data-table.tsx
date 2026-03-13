@@ -53,7 +53,7 @@ export function DataTable({
       accessorKey: col,
       header: ({ column }) => (
         <button
-          className="flex items-center gap-1 hover:text-foreground"
+          className="hover:text-foreground flex items-center gap-1"
           onClick={() => column.toggleSorting()}
         >
           {col}
@@ -117,12 +117,9 @@ export function DataTable({
         style={{ maxHeight: resolvedMaxHeight }}
       >
         <table className="w-full caption-bottom text-sm">
-          <thead className="sticky top-0 z-10 bg-background [&_tr]:border-b">
+          <thead className="bg-background sticky top-0 z-10 [&_tr]:border-b">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr
-                key={headerGroup.id}
-                className="border-b hover:bg-muted/50"
-              >
+              <tr key={headerGroup.id} className="hover:bg-muted/50 border-b">
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder
@@ -139,14 +136,18 @@ export function DataTable({
           <tbody className="[&_tr:last-child]:border-0">
             {tableRows.length ? (
               <>
-                <tr style={{ height: `${virtualizer.getVirtualItems()[0]?.start ?? 0}px` }} />
+                <tr
+                  style={{
+                    height: `${virtualizer.getVirtualItems()[0]?.start ?? 0}px`,
+                  }}
+                />
                 {virtualizer.getVirtualItems().map((virtualRow) => {
                   const row = tableRows[virtualRow.index];
                   return (
                     <tr
                       key={row.id}
                       data-index={virtualRow.index}
-                      className="border-b hover:bg-muted/50"
+                      className="hover:bg-muted/50 border-b"
                       style={{ height: `${ROW_HEIGHT}px` }}
                     >
                       {row.getVisibleCells().map((cell) => (
@@ -160,7 +161,11 @@ export function DataTable({
                     </tr>
                   );
                 })}
-                <tr style={{ height: `${virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0)}px` }} />
+                <tr
+                  style={{
+                    height: `${virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0)}px`,
+                  }}
+                />
               </>
             ) : (
               <tr className="border-b">
@@ -176,7 +181,7 @@ export function DataTable({
         </table>
       </div>
       {showRowCount && (
-        <div className="border-t px-3 py-2 text-xs text-muted-foreground">
+        <div className="text-muted-foreground border-t px-3 py-2 text-xs">
           {rows.length} {rows.length === 1 ? "row" : "rows"}
         </div>
       )}
@@ -237,7 +242,7 @@ export function N6KDataTable({
     <div className={className}>
       <div className={cn("rounded-md border")}>
         <div className="flex items-center gap-2 border-b px-3 py-2">
-          <span className="text-xs font-medium text-muted-foreground shrink-0">
+          <span className="text-muted-foreground shrink-0 text-xs font-medium">
             WHERE
           </span>
           <Input
@@ -245,7 +250,7 @@ export function N6KDataTable({
             onChange={(e) => setWhereInput(e.target.value)}
             onKeyDown={handleWhereKeyDown}
             placeholder="e.g. status = 'active' AND age > 18"
-            className="h-7 text-xs font-mono"
+            className="h-7 font-mono text-xs"
           />
         </div>
         {status === "error" && (
@@ -253,7 +258,7 @@ export function N6KDataTable({
         )}
       </div>
       {(status === "loading" || status === "idle") && (
-        <div className="p-4 text-muted-foreground">Loading…</div>
+        <div className="text-muted-foreground p-4">Loading…</div>
       )}
       {status === "ready" && (
         <DataTable

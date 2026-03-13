@@ -6,11 +6,22 @@ import vegaEmbed from "vega-embed";
 
 // --- Shared types ---
 
-export type LegendOrient = "left" | "right" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "none";
+export type LegendOrient =
+  | "left"
+  | "right"
+  | "top"
+  | "bottom"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "none";
 
 // --- Arrow → Vega type mapping ---
 
-function arrowToVegaType(typeId: number): "temporal" | "quantitative" | "nominal" | "ordinal" {
+function arrowToVegaType(
+  typeId: number,
+): "temporal" | "quantitative" | "nominal" | "ordinal" {
   switch (typeId) {
     case Type.Timestamp:
     case Type.Date:
@@ -43,12 +54,16 @@ export function inferType(
   fieldName: string,
   role: "x" | "y" | "y2" | "hue" | "size" | "xOffset" | "theta" | "labels",
 ): string {
-  if (role === "hue" || role === "xOffset" || role === "labels") return "nominal";
+  if (role === "hue" || role === "xOffset" || role === "labels")
+    return "nominal";
   if (role === "size" || role === "theta") return "quantitative";
 
-  if (!schema?.fields) return role === "y" || role === "y2" ? "quantitative" : "nominal";
+  if (!schema?.fields)
+    return role === "y" || role === "y2" ? "quantitative" : "nominal";
 
-  const field = schema.fields.find((f: { name: string }) => f.name === fieldName);
+  const field = schema.fields.find(
+    (f: { name: string }) => f.name === fieldName,
+  );
   if (!field) return role === "y" || role === "y2" ? "quantitative" : "nominal";
 
   return arrowToVegaType(field.typeId);
@@ -76,7 +91,10 @@ export type DataSourceProps =
  * @param props - Object with either a table or query property.
  * @returns SQL query string.
  */
-export function resolveDataSource(props: { table?: string; query?: string }): string {
+export function resolveDataSource(props: {
+  table?: string;
+  query?: string;
+}): string {
   if (props.query) return props.query;
   if (props.table) return `SELECT * FROM ${props.table}`;
   throw new Error("Either table or query must be provided");
@@ -87,7 +105,10 @@ export function resolveDataSource(props: { table?: string; query?: string }): st
  * @param props - Object with either a table or query property.
  * @returns Table name or wrapped subquery alias.
  */
-export function resolveSourceForSQL(props: { table?: string; query?: string }): string {
+export function resolveSourceForSQL(props: {
+  table?: string;
+  query?: string;
+}): string {
   if (props.table) return props.table;
   if (props.query) return `(${props.query}) AS _src`;
   throw new Error("Either table or query must be provided");
@@ -153,7 +174,8 @@ export function useVegaChart(
   containerRef: React.RefObject<HTMLDivElement | null>,
 ) {
   useEffect(() => {
-    if (status !== "ready" || !containerRef.current || rows.length === 0) return;
+    if (status !== "ready" || !containerRef.current || rows.length === 0)
+      return;
 
     const safeRows = rows.map((row) => {
       const out: Record<string, unknown> = {};
@@ -190,7 +212,9 @@ export function useChartData(
   fields: Record<string, string | undefined>,
 ) {
   const baseSQL = resolveDataSource(props);
-  const hasExpressions = Object.values(fields).some((f) => f && isExpression(f));
+  const hasExpressions = Object.values(fields).some(
+    (f) => f && isExpression(f),
+  );
 
   let rawQuery: string;
   let fieldMap: Record<string, string>;
@@ -309,12 +333,24 @@ export function buildAggregateQuery(
 
   let aggExpr: string;
   switch (estimator) {
-    case "mean": aggExpr = `AVG(${yCol})`; break;
-    case "sum": aggExpr = `SUM(${yCol})`; break;
-    case "count": aggExpr = `COUNT(${yCol})`; break;
-    case "median": aggExpr = `MEDIAN(${yCol})`; break;
-    case "min": aggExpr = `MIN(${yCol})`; break;
-    case "max": aggExpr = `MAX(${yCol})`; break;
+    case "mean":
+      aggExpr = `AVG(${yCol})`;
+      break;
+    case "sum":
+      aggExpr = `SUM(${yCol})`;
+      break;
+    case "count":
+      aggExpr = `COUNT(${yCol})`;
+      break;
+    case "median":
+      aggExpr = `MEDIAN(${yCol})`;
+      break;
+    case "min":
+      aggExpr = `MIN(${yCol})`;
+      break;
+    case "max":
+      aggExpr = `MAX(${yCol})`;
+      break;
   }
 
   const selects = [xAlias, `${aggExpr} AS __value`];
@@ -334,16 +370,28 @@ export function buildAggregateQuery(
         selects.push(`${aggExpr} + STDDEV(${yCol}) AS __error_hi`);
         break;
       case "se":
-        selects.push(`${aggExpr} - STDDEV(${yCol}) / SQRT(COUNT(${yCol})) AS __error_lo`);
-        selects.push(`${aggExpr} + STDDEV(${yCol}) / SQRT(COUNT(${yCol})) AS __error_hi`);
+        selects.push(
+          `${aggExpr} - STDDEV(${yCol}) / SQRT(COUNT(${yCol})) AS __error_lo`,
+        );
+        selects.push(
+          `${aggExpr} + STDDEV(${yCol}) / SQRT(COUNT(${yCol})) AS __error_hi`,
+        );
         break;
       case "ci":
-        selects.push(`PERCENTILE_CONT(0.025) WITHIN GROUP (ORDER BY ${yCol}) AS __error_lo`);
-        selects.push(`PERCENTILE_CONT(0.975) WITHIN GROUP (ORDER BY ${yCol}) AS __error_hi`);
+        selects.push(
+          `PERCENTILE_CONT(0.025) WITHIN GROUP (ORDER BY ${yCol}) AS __error_lo`,
+        );
+        selects.push(
+          `PERCENTILE_CONT(0.975) WITHIN GROUP (ORDER BY ${yCol}) AS __error_hi`,
+        );
         break;
       case "pi":
-        selects.push(`PERCENTILE_CONT(0.025) WITHIN GROUP (ORDER BY ${yCol}) AS __error_lo`);
-        selects.push(`PERCENTILE_CONT(0.975) WITHIN GROUP (ORDER BY ${yCol}) AS __error_hi`);
+        selects.push(
+          `PERCENTILE_CONT(0.025) WITHIN GROUP (ORDER BY ${yCol}) AS __error_lo`,
+        );
+        selects.push(
+          `PERCENTILE_CONT(0.975) WITHIN GROUP (ORDER BY ${yCol}) AS __error_hi`,
+        );
         break;
     }
   }

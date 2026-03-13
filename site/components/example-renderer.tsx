@@ -1,7 +1,7 @@
 import { useState, useEffect, type ComponentType } from "react";
 
 const allExamples = import.meta.glob<{ default: ComponentType }>(
-  "../../examples/**/*.tsx"
+  "../../examples/**/*.tsx",
 );
 
 export function ExampleRenderer({ examplePath }: { examplePath: string }) {

@@ -1,5 +1,12 @@
 import { useRef, useMemo } from "react";
-import { useChartData, useVegaChart, inferType, resolveField, temporalAxisConfig, type LegendOrient } from "@/lib/n6k-chart-utils";
+import {
+  useChartData,
+  useVegaChart,
+  inferType,
+  resolveField,
+  temporalAxisConfig,
+  type LegendOrient,
+} from "@/lib/n6k-chart-utils";
 
 /**
  * Line chart with hue grouping and temporal axis support.
@@ -35,7 +42,10 @@ export function N6KLineChart({
   legend?: LegendOrient;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { rows, status, error, schema, fieldMap } = useChartData({ table, query }, { x, y, hue });
+  const { rows, status, error, schema, fieldMap } = useChartData(
+    { table, query },
+    { x, y, hue },
+  );
 
   const xField = resolveField(fieldMap, "x", x)!;
   const yField = resolveField(fieldMap, "y", y)!;
@@ -51,7 +61,9 @@ export function N6KLineChart({
         type: xType,
         ...(xTitle ? { title: xTitle } : {}),
         ...(sort === false ? {} : { sort: null }),
-        ...(xType === "temporal" ? { axis: temporalAxisConfig(rows, xField) } : {}),
+        ...(xType === "temporal"
+          ? { axis: temporalAxisConfig(rows, xField) }
+          : {}),
       },
       y: {
         field: yField,
@@ -77,7 +89,7 @@ export function N6KLineChart({
   useVegaChart(spec, rows, status, containerRef);
 
   if (status === "loading" || status === "idle") {
-    return <div className="p-4 text-muted-foreground">Loading…</div>;
+    return <div className="text-muted-foreground p-4">Loading…</div>;
   }
   if (status === "error") {
     return <div className="p-4 text-red-500">{error}</div>;

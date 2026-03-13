@@ -4,15 +4,22 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 const registry = JSON.parse(
-  readFileSync(join(process.cwd(), "public", "r", "registry.json"), "utf-8")
+  readFileSync(join(process.cwd(), "public", "r", "registry.json"), "utf-8"),
 );
 
 const items = registry.items ?? [];
 
 function getCategory(item: any): string {
   if (item.type === "registry:lib") return "lib";
-  if (item.name.startsWith("n6k-") && (item.name.includes("chart") || item.name.includes("histogram"))) return "charts";
-  if (["n6k-page", "n6k-section", "n6k-grid", "n6k-columns"].includes(item.name)) return "layout";
+  if (
+    item.name.startsWith("n6k-") &&
+    (item.name.includes("chart") || item.name.includes("histogram"))
+  )
+    return "charts";
+  if (
+    ["n6k-page", "n6k-section", "n6k-grid", "n6k-columns"].includes(item.name)
+  )
+    return "layout";
   return "ui";
 }
 
@@ -23,69 +30,134 @@ const categorized = items.map((item: any) => ({
 ---
 
 <Base title={registry.name}>
-  <p class="text-neutral-500 dark:text-neutral-500 text-sm mb-6">
+  <p class="mb-6 text-sm text-neutral-500 dark:text-neutral-500">
     A component registry for data visualization & UI
   </p>
 
-  <section class="mb-8 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
-    <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Setup</h2>
-    <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Add the registry to your <code class="text-xs bg-neutral-50 dark:bg-neutral-900 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-800">components.json</code></p>
-    <div class="relative group">
-      <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto"><code id="setup-cmd">{`"registries": {\n  "@n6k": "https://n6k-io.github.io/registry/r/{name}.json"\n}`}</code></pre>
+  <section
+    class="mb-8 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800"
+  >
+    <h2
+      class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600"
+    >
+      Setup
+    </h2>
+    <p class="mb-3 text-sm text-neutral-600 dark:text-neutral-400">
+      Add the registry to your <code
+        class="rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-xs dark:border-neutral-800 dark:bg-neutral-900"
+        >components.json</code>
+    </p>
+    <div class="group relative">
+      <pre
+        class="overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300"><code id="setup-cmd">{`"registries": {\n  "@n6k": "https://n6k-io.github.io/registry/r/{name}.json"\n}`}</code></pre>
       <button
         id="setup-copy-btn"
-        class="absolute top-2 right-2 p-1.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:hover:text-neutral-200"
+        class="absolute top-2 right-2 rounded-md bg-neutral-200 p-1.5 text-neutral-500 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
         aria-label="Copy setup config"
       >
-        <svg class="setup-copy-icon w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+        <svg
+          class="setup-copy-icon h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path
+            d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
         </svg>
-        <svg class="setup-check-icon w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12" />
+        <svg
+          class="setup-check-icon hidden h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       </button>
     </div>
-    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-3">Then install components with:</p>
-    <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto mt-2"><code>bunx shadcn@latest add @n6k/&lt;component&gt;</code></pre>
+    <p class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+      Then install components with:
+    </p>
+    <pre
+      class="mt-2 overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300"><code>bunx shadcn@latest add @n6k/&lt;component&gt;</code></pre>
   </section>
 
   <input
     id="search"
     type="text"
     placeholder="Search components..."
-    class="w-full px-4 py-2 mb-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-600 outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-700 text-sm"
+    class="mb-4 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 outline-none focus:ring-2 focus:ring-neutral-300 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200 dark:placeholder-neutral-600 dark:focus:ring-neutral-700"
   />
 
-  <div id="filters" class="flex gap-2 mb-6 text-sm">
-    <button data-filter="all" class="filter-btn px-3 py-1 rounded-full border border-neutral-300 dark:border-neutral-700 bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900">All</button>
-    <button data-filter="ui" class="filter-btn px-3 py-1 rounded-full border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800">UI</button>
-    <button data-filter="charts" class="filter-btn px-3 py-1 rounded-full border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800">Charts</button>
-    <button data-filter="layout" class="filter-btn px-3 py-1 rounded-full border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800">Layout</button>
-    <button data-filter="lib" class="filter-btn px-3 py-1 rounded-full border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800">Lib</button>
+  <div id="filters" class="mb-6 flex gap-2 text-sm">
+    <button
+      data-filter="all"
+      class="filter-btn rounded-full border border-neutral-300 bg-neutral-900 px-3 py-1 text-white dark:border-neutral-700 dark:bg-neutral-100 dark:text-neutral-900"
+      >All</button
+    >
+    <button
+      data-filter="ui"
+      class="filter-btn rounded-full border border-neutral-300 px-3 py-1 text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+      >UI</button
+    >
+    <button
+      data-filter="charts"
+      class="filter-btn rounded-full border border-neutral-300 px-3 py-1 text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+      >Charts</button
+    >
+    <button
+      data-filter="layout"
+      class="filter-btn rounded-full border border-neutral-300 px-3 py-1 text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+      >Layout</button
+    >
+    <button
+      data-filter="lib"
+      class="filter-btn rounded-full border border-neutral-300 px-3 py-1 text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+      >Lib</button
+    >
   </div>
 
-  <div id="component-list" class="border border-neutral-200 dark:border-neutral-800 rounded-lg divide-y divide-neutral-200 dark:divide-neutral-800">
-    {categorized.map((item: any) => (
-      <a
-        href={`/component/${item.name}`}
-        class="component-row flex items-center justify-between px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-900 first:rounded-t-lg last:rounded-b-lg"
-        data-category={item.category}
-        data-name={item.name.toLowerCase()}
-        data-title={(item.title || item.name).toLowerCase()}
-        data-description={(item.description || "").toLowerCase()}
-      >
-        <div class="min-w-0">
-          <span class="font-medium text-sm text-neutral-900 dark:text-neutral-200">{item.title || item.name}</span>
-          <span class="ml-3 text-sm text-neutral-400 dark:text-neutral-500 truncate">{item.description}</span>
-        </div>
-        <svg class="w-4 h-4 text-neutral-400 dark:text-neutral-600 shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    ))}
+  <div
+    id="component-list"
+    class="divide-y divide-neutral-200 rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800"
+  >
+    {
+      categorized.map((item: any) => (
+        <a
+          href={`/component/${item.name}`}
+          class="component-row flex items-center justify-between px-4 py-3 first:rounded-t-lg last:rounded-b-lg hover:bg-neutral-50 dark:hover:bg-neutral-900"
+          data-category={item.category}
+          data-name={item.name.toLowerCase()}
+          data-title={(item.title || item.name).toLowerCase()}
+          data-description={(item.description || "").toLowerCase()}
+        >
+          <div class="min-w-0">
+            <span class="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+              {item.title || item.name}
+            </span>
+            <span class="ml-3 truncate text-sm text-neutral-400 dark:text-neutral-500">
+              {item.description}
+            </span>
+          </div>
+          <svg
+            class="ml-4 h-4 w-4 shrink-0 text-neutral-400 dark:text-neutral-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      ))
+    }
   </div>
 
-  <p id="count" class="text-right text-xs text-neutral-400 dark:text-neutral-600 mt-3">
+  <p
+    id="count"
+    class="mt-3 text-right text-xs text-neutral-400 dark:text-neutral-600"
+  >
     {items.length} components
   </p>
 
@@ -100,8 +172,10 @@ const categorized = items.map((item: any) => ({
       const query = search.value.toLowerCase();
       let visible = 0;
       rows.forEach((row) => {
-        const matchesFilter = activeFilter === "all" || row.dataset.category === activeFilter;
-        const matchesSearch = !query ||
+        const matchesFilter =
+          activeFilter === "all" || row.dataset.category === activeFilter;
+        const matchesSearch =
+          !query ||
           row.dataset.name.includes(query) ||
           row.dataset.title.includes(query) ||
           row.dataset.description.includes(query);
@@ -131,10 +205,20 @@ const categorized = items.map((item: any) => ({
         activeFilter = btn.dataset.filter;
         filterBtns.forEach((b) => {
           if (b === btn) {
-            b.classList.add("bg-neutral-900", "text-white", "dark:bg-neutral-100", "dark:text-neutral-900");
+            b.classList.add(
+              "bg-neutral-900",
+              "text-white",
+              "dark:bg-neutral-100",
+              "dark:text-neutral-900",
+            );
             b.classList.remove("text-neutral-600", "dark:text-neutral-400");
           } else {
-            b.classList.remove("bg-neutral-900", "text-white", "dark:bg-neutral-100", "dark:text-neutral-900");
+            b.classList.remove(
+              "bg-neutral-900",
+              "text-white",
+              "dark:bg-neutral-100",
+              "dark:text-neutral-900",
+            );
             b.classList.add("text-neutral-600", "dark:text-neutral-400");
           }
         });

@@ -8,7 +8,7 @@ function QueryResults({ query }: { query: string }) {
   const { columns, rows, status, error } = useQuery(query);
 
   if (status === "loading" || status === "idle") {
-    return <div className="p-4 text-muted-foreground">Loading…</div>;
+    return <div className="text-muted-foreground p-4">Loading…</div>;
   }
 
   if (status === "error") {

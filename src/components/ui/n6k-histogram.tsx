@@ -1,7 +1,11 @@
 import { useRef, useMemo } from "react";
 import { useQuery } from "@n6k.io/db/react";
 import { useInterpolate } from "@n6k.io/ui";
-import { useVegaChart, resolveSourceForSQL, isExpression } from "@/lib/n6k-chart-utils";
+import {
+  useVegaChart,
+  resolveSourceForSQL,
+  isExpression,
+} from "@/lib/n6k-chart-utils";
 
 type Stat = "count" | "frequency" | "density" | "probability";
 
@@ -115,7 +119,11 @@ export function N6KHistogram({
     const encoding: Record<string, unknown> = {
       x: { field: "bin_start", type: "quantitative", bin: { binned: true } },
       x2: { field: "bin_end" },
-      y: { field: "value", type: "quantitative", stack: multiple === "stack" ? true : null },
+      y: {
+        field: "value",
+        type: "quantitative",
+        stack: multiple === "stack" ? true : null,
+      },
     };
 
     if (hue) {
@@ -134,7 +142,7 @@ export function N6KHistogram({
   useVegaChart(spec, rows, status, containerRef);
 
   if (status === "loading" || status === "idle") {
-    return <div className="p-4 text-muted-foreground">Loading…</div>;
+    return <div className="text-muted-foreground p-4">Loading…</div>;
   }
   if (status === "error") {
     return <div className="p-4 text-red-500">{error}</div>;

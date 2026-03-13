@@ -17,7 +17,7 @@ export function N6KSection({
 }) {
   return (
     <section className={cn("space-y-4", className)}>
-      <h2 className="text-lg font-semibold tracking-tight text-foreground">
+      <h2 className="text-foreground text-lg font-semibold tracking-tight">
         {title}
       </h2>
       {children}

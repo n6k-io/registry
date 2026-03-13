@@ -7,13 +7,7 @@ import { Label } from "@/components/ui/label";
  * @param props.label - Label text displayed next to the checkbox.
  * @param props.bind - Binding key for the boolean value.
  */
-export function N6KToggle({
-  label,
-  bind,
-}: {
-  label: string;
-  bind: string;
-}) {
+export function N6KToggle({ label, bind }: { label: string; bind: string }) {
   const [value, setValue] = useBinding<boolean>(bind);
 
   return (

@@ -10,7 +10,7 @@ import { getHighlighter, highlight } from "../../lib/highlighter";
 export function getStaticPaths() {
   const dir = join(process.cwd(), "public", "r");
   const files = readdirSync(dir).filter(
-    (f) => f.endsWith(".json") && f !== "registry.json"
+    (f) => f.endsWith(".json") && f !== "registry.json",
   );
   return files.map((f) => ({
     params: { name: f.replace(".json", "") },
@@ -20,11 +20,11 @@ export function getStaticPaths() {
 const { name } = Astro.params;
 
 const registry = JSON.parse(
-  readFileSync(join(process.cwd(), "public", "r", "registry.json"), "utf-8")
+  readFileSync(join(process.cwd(), "public", "r", "registry.json"), "utf-8"),
 );
 
 const component = JSON.parse(
-  readFileSync(join(process.cwd(), "public", "r", `${name}.json`), "utf-8")
+  readFileSync(join(process.cwd(), "public", "r", `${name}.json`), "utf-8"),
 );
 
 const installCmd = `bunx shadcn@latest add @n6k/${name}`;
@@ -35,8 +35,18 @@ const allDocs = existsSync(docsPath)
   ? JSON.parse(readFileSync(docsPath, "utf-8"))
   : {};
 
-type PropDoc = { name: string; type: string; optional: boolean; description: string };
-type ExportDoc = { name: string; description: string; import: string; props: PropDoc[] };
+type PropDoc = {
+  name: string;
+  type: string;
+  optional: boolean;
+  description: string;
+};
+type ExportDoc = {
+  name: string;
+  description: string;
+  import: string;
+  props: PropDoc[];
+};
 const componentDocs: { exports: ExportDoc[] } | undefined = allDocs[name];
 
 // Load examples
@@ -69,7 +79,11 @@ const heroExample = examples[0];
 const additionalExamples = examples.slice(1);
 
 // Resolve registry dependency links
-const registryDeps: { name: string; displayName: string; href: string | null }[] = [];
+const registryDeps: {
+  name: string;
+  displayName: string;
+  href: string | null;
+}[] = [];
 if (component.registryDependencies) {
   const rDir = join(process.cwd(), "public", "r");
   for (const dep of component.registryDependencies as string[]) {
@@ -87,7 +101,9 @@ if (component.registryDependencies) {
 const sourceFiles = (component.files ?? [])
   .filter((f: any) => f.content)
   .map((f: any) => {
-    const lang = f.path.endsWith(".ts") ? "typescript" as const : "tsx" as const;
+    const lang = f.path.endsWith(".ts")
+      ? ("typescript" as const)
+      : ("tsx" as const);
     return {
       path: f.path,
       code: f.content,
@@ -99,182 +115,282 @@ const sourceFiles = (component.files ?? [])
 <Base title={`${component.title || name} - ${registry.name}`}>
   <a
     href="/"
-    class="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 inline-flex items-center gap-1 mb-6"
+    class="mb-6 inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
   >
-    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M15 19l-7-7 7-7" />
+    <svg
+      class="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path d="M15 19l-7-7 7-7"></path>
     </svg>
     Back
   </a>
 
-  <div class="flex items-start justify-between mb-6">
+  <div class="mb-6 flex items-start justify-between">
     <div>
-      <h1 class="text-2xl font-semibold mb-1">{component.title || name}</h1>
-      <p class="text-neutral-500 dark:text-neutral-500 text-sm">{component.description}</p>
+      <h1 class="mb-1 text-2xl font-semibold">{component.title || name}</h1>
+      <p class="text-sm text-neutral-500 dark:text-neutral-500">
+        {component.description}
+      </p>
     </div>
-    {sourceFiles.length > 0 && (
-      <SourceViewer files={sourceFiles} client:load />
-    )}
+    {sourceFiles.length > 0 && <SourceViewer files={sourceFiles} client:load />}
   </div>
 
-  {heroExample && (
-    <section class="mb-8">
-      <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-        <div class="bg-neutral-50 dark:bg-neutral-900">
-          <ExampleRenderer examplePath={heroExample.globPath} client:load />
-        </div>
-        <div class="flex items-center justify-end px-4 py-2 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-          <CodeViewer code={heroExample.code} html={heroExample.html} filename={heroExample.filename} client:load />
-        </div>
-      </div>
-    </section>
-  )}
-
-  {componentDocs && componentDocs.exports.length > 0 && (
-    <section class="mb-8">
-      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Usage</h2>
-      <div class="space-y-4">
-        {componentDocs.exports.map((exp) => (
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-sm font-medium text-neutral-900 dark:text-neutral-200">{exp.name}</span>
-              {exp.description && (
-                <span class="text-xs text-neutral-500 dark:text-neutral-400">{exp.description}</span>
-              )}
-            </div>
-            <div class="relative group">
-              <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto"><code class="copy-content">{exp.import}</code></pre>
-              <button
-                class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:hover:text-neutral-200"
-                aria-label={`Copy ${exp.name} import`}
-              >
-                <svg class="copy-icon w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                </svg>
-                <svg class="check-icon w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </button>
-            </div>
+  {
+    heroExample && (
+      <section class="mb-8">
+        <div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
+          <div class="bg-neutral-50 dark:bg-neutral-900">
+            <ExampleRenderer examplePath={heroExample.globPath} client:load />
           </div>
-        ))}
-      </div>
-    </section>
-  )}
-
-  {componentDocs && componentDocs.exports.some((e) => e.props.length > 0) && (
-    <section class="mb-8">
-      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Props</h2>
-      <div class="space-y-6">
-        {componentDocs.exports.filter((e) => e.props.length > 0).map((exp) => (
-          <div>
-            {componentDocs.exports.filter((e) => e.props.length > 0).length > 1 && (
-              <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-200 mb-2">{exp.name}</h3>
-            )}
-            <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900">
-                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Name</th>
-                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Type</th>
-                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Required</th>
-                    <th class="text-left px-4 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {exp.props.map((prop: PropDoc) => (
-                    <tr class="border-b border-neutral-200 dark:border-neutral-800 last:border-0">
-                      <td class="px-4 py-2 font-mono text-xs text-neutral-900 dark:text-neutral-200">{prop.name}</td>
-                      <td class="px-4 py-2 font-mono text-xs text-neutral-500 dark:text-neutral-400">{prop.type}</td>
-                      <td class="px-4 py-2 text-xs text-neutral-500 dark:text-neutral-400">{prop.optional ? "No" : "Yes"}</td>
-                      <td class="px-4 py-2 text-xs text-neutral-500 dark:text-neutral-400">{prop.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div class="flex items-center justify-end border-t border-neutral-200 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-950">
+            <CodeViewer
+              code={heroExample.code}
+              html={heroExample.html}
+              filename={heroExample.filename}
+              client:load
+            />
           </div>
-        ))}
-      </div>
-    </section>
-  )}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    componentDocs && componentDocs.exports.length > 0 && (
+      <section class="mb-8">
+        <h2 class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600">
+          Usage
+        </h2>
+        <div class="space-y-4">
+          {componentDocs.exports.map((exp) => (
+            <div>
+              <div class="mb-1 flex items-center gap-2">
+                <span class="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                  {exp.name}
+                </span>
+                {exp.description && (
+                  <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                    {exp.description}
+                  </span>
+                )}
+              </div>
+              <div class="group relative">
+                <pre class="overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300">
+                  <code class="copy-content">{exp.import}</code>
+                </pre>
+                <button
+                  class="copy-btn absolute top-2 right-2 rounded-md bg-neutral-200 p-1.5 text-neutral-500 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  aria-label={`Copy ${exp.name} import`}
+                >
+                  <svg
+                    class="copy-icon h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                  </svg>
+                  <svg
+                    class="check-icon hidden h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    componentDocs && componentDocs.exports.some((e) => e.props.length > 0) && (
+      <section class="mb-8">
+        <h2 class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600">
+          Props
+        </h2>
+        <div class="space-y-6">
+          {componentDocs.exports
+            .filter((e) => e.props.length > 0)
+            .map((exp) => (
+              <div>
+                {componentDocs.exports.filter((e) => e.props.length > 0)
+                  .length > 1 && (
+                  <h3 class="mb-2 text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                    {exp.name}
+                  </h3>
+                )}
+                <div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900">
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                          Name
+                        </th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                          Type
+                        </th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                          Required
+                        </th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                          Description
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {exp.props.map((prop: PropDoc) => (
+                        <tr class="border-b border-neutral-200 last:border-0 dark:border-neutral-800">
+                          <td class="px-4 py-2 font-mono text-xs text-neutral-900 dark:text-neutral-200">
+                            {prop.name}
+                          </td>
+                          <td class="px-4 py-2 font-mono text-xs text-neutral-500 dark:text-neutral-400">
+                            {prop.type}
+                          </td>
+                          <td class="px-4 py-2 text-xs text-neutral-500 dark:text-neutral-400">
+                            {prop.optional ? "No" : "Yes"}
+                          </td>
+                          <td class="px-4 py-2 text-xs text-neutral-500 dark:text-neutral-400">
+                            {prop.description}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+        </div>
+      </section>
+    )
+  }
 
   <section class="mb-8">
-    <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Install</h2>
-    <div class="relative group">
-      <pre class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-3 text-sm text-neutral-800 dark:text-neutral-300 overflow-x-auto"><code class="copy-content">{installCmd}</code></pre>
+    <h2
+      class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600"
+    >
+      Install
+    </h2>
+    <div class="group relative">
+      <pre
+        class="overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300"><code class="copy-content">{installCmd}</code></pre>
       <button
-        class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:hover:text-neutral-200"
+        class="copy-btn absolute top-2 right-2 rounded-md bg-neutral-200 p-1.5 text-neutral-500 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
         aria-label="Copy install command"
       >
-        <svg class="copy-icon w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+        <svg
+          class="copy-icon h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path
+            d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
         </svg>
-        <svg class="check-icon w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12" />
+        <svg
+          class="check-icon hidden h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       </button>
     </div>
   </section>
 
-  {(component.dependencies?.length > 0) && (
-    <section class="mb-8">
-      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Dependencies</h2>
-      <div class="flex gap-2 flex-wrap">
-        {component.dependencies.map((dep: string) => (
-          <span class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400">
-            {dep}
-          </span>
-        ))}
-      </div>
-    </section>
-  )}
-
-  {registryDeps.length > 0 && (
-    <section class="mb-8">
-      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Registry Dependencies</h2>
-      <div class="flex gap-2 flex-wrap">
-        {registryDeps.map((dep) => (
-          dep.href ? (
-            <a
-              href={dep.href}
-              class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:border-neutral-400 dark:hover:border-neutral-600"
-            >
-              {dep.displayName}
-            </a>
-          ) : (
-            <span class="text-xs px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400">
-              {dep.displayName}
+  {
+    component.dependencies?.length > 0 && (
+      <section class="mb-8">
+        <h2 class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600">
+          Dependencies
+        </h2>
+        <div class="flex flex-wrap gap-2">
+          {component.dependencies.map((dep: string) => (
+            <span class="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
+              {dep}
             </span>
-          )
-        ))}
-      </div>
-    </section>
-  )}
+          ))}
+        </div>
+      </section>
+    )
+  }
 
-  {additionalExamples.length > 0 && (
-    <section class="mb-8">
-      <h2 class="text-xs font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-600 mb-3">Examples</h2>
-      <div class="space-y-6">
-        {additionalExamples.map((ex: any) => (
-          <div>
-            <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-200 mb-1">{ex.title}</h3>
-            {ex.description && (
-              <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-3">{ex.description}</p>
-            )}
-            <div class="rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-              <div class="bg-neutral-50 dark:bg-neutral-900">
-                <ExampleRenderer examplePath={ex.globPath} client:load />
-              </div>
-              <div class="flex items-center justify-end px-4 py-2 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
-                <CodeViewer code={ex.code} html={ex.html} filename={ex.filename} client:load />
+  {
+    registryDeps.length > 0 && (
+      <section class="mb-8">
+        <h2 class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600">
+          Registry Dependencies
+        </h2>
+        <div class="flex flex-wrap gap-2">
+          {registryDeps.map((dep) =>
+            dep.href ? (
+              <a
+                href={dep.href}
+                class="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-600 hover:border-neutral-400 hover:text-neutral-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:text-neutral-200"
+              >
+                {dep.displayName}
+              </a>
+            ) : (
+              <span class="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
+                {dep.displayName}
+              </span>
+            ),
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    additionalExamples.length > 0 && (
+      <section class="mb-8">
+        <h2 class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600">
+          Examples
+        </h2>
+        <div class="space-y-6">
+          {additionalExamples.map((ex: any) => (
+            <div>
+              <h3 class="mb-1 text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                {ex.title}
+              </h3>
+              {ex.description && (
+                <p class="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
+                  {ex.description}
+                </p>
+              )}
+              <div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <div class="bg-neutral-50 dark:bg-neutral-900">
+                  <ExampleRenderer examplePath={ex.globPath} client:load />
+                </div>
+                <div class="flex items-center justify-end border-t border-neutral-200 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-950">
+                  <CodeViewer
+                    code={ex.code}
+                    html={ex.html}
+                    filename={ex.filename}
+                    client:load
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   <script is:inline>
     document.querySelectorAll(".copy-btn").forEach((btn) => {

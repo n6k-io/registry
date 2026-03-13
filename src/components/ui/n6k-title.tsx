@@ -17,7 +17,7 @@ export function N6KTitle({
   return (
     <h1
       className={cn(
-        "text-2xl font-bold tracking-tight text-foreground",
+        "text-foreground text-2xl font-bold tracking-tight",
         className,
       )}
     >

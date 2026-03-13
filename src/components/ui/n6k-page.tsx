@@ -24,7 +24,7 @@ export function N6KPage({
   }, [interpolatedTitle]);
 
   return (
-    <div className={cn("mx-auto max-w-4xl px-6 py-8 space-y-6", className)}>
+    <div className={cn("mx-auto max-w-4xl space-y-6 px-6 py-8", className)}>
       {children}
     </div>
   );

@@ -1,5 +1,10 @@
 import { useRef, useMemo } from "react";
-import { useChartData, useVegaChart, inferType, resolveField } from "@/lib/n6k-chart-utils";
+import {
+  useChartData,
+  useVegaChart,
+  inferType,
+  resolveField,
+} from "@/lib/n6k-chart-utils";
 
 /**
  * Scatter plot with optional hue and size encoding.
@@ -26,7 +31,10 @@ export function N6KScatterChart({
   size?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { rows, status, error, schema, fieldMap } = useChartData({ table, query }, { x, y, hue, size });
+  const { rows, status, error, schema, fieldMap } = useChartData(
+    { table, query },
+    { x, y, hue, size },
+  );
 
   const xField = resolveField(fieldMap, "x", x)!;
   const yField = resolveField(fieldMap, "y", y)!;
@@ -59,7 +67,7 @@ export function N6KScatterChart({
   useVegaChart(spec, rows, status, containerRef);
 
   if (status === "loading" || status === "idle") {
-    return <div className="p-4 text-muted-foreground">Loading…</div>;
+    return <div className="text-muted-foreground p-4">Loading…</div>;
   }
   if (status === "error") {
     return <div className="p-4 text-red-500">{error}</div>;
