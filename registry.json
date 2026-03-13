@@ -308,7 +308,7 @@
         "vega-embed"
       ],
       "registryDependencies": [
-        "n6k-chart-utils"
+        "@n6k/n6k-chart-utils"
       ],
       "files": [
         {
@@ -327,7 +327,7 @@
         "vega-embed"
       ],
       "registryDependencies": [
-        "n6k-chart-utils"
+        "@n6k/n6k-chart-utils"
       ],
       "files": [
         {
@@ -347,7 +347,7 @@
         "vega-embed"
       ],
       "registryDependencies": [
-        "n6k-chart-utils"
+        "@n6k/n6k-chart-utils"
       ],
       "files": [
         {
@@ -366,7 +366,7 @@
         "vega-embed"
       ],
       "registryDependencies": [
-        "n6k-chart-utils"
+        "@n6k/n6k-chart-utils"
       ],
       "files": [
         {
@@ -386,7 +386,7 @@
         "vega-embed"
       ],
       "registryDependencies": [
-        "n6k-chart-utils"
+        "@n6k/n6k-chart-utils"
       ],
       "files": [
         {
@@ -406,7 +406,7 @@
         "vega-embed"
       ],
       "registryDependencies": [
-        "n6k-chart-utils"
+        "@n6k/n6k-chart-utils"
       ],
       "files": [
         {
