@@ -16,7 +16,7 @@ function SQLValue({
   format,
 }: {
   query: string;
-  format?: (v: any) => string;
+  format?: (v: unknown) => string;
 }) {
   const sql = useInterpolate(resolveScalar(query));
   const { rows, status } = useQuery(sql);
@@ -43,9 +43,9 @@ export function N6KMetric({
 }: {
   label: string;
   value: string;
-  valueFormat?: (v: any) => string;
+  valueFormat?: (v: unknown) => string;
   delta?: string;
-  deltaFormat?: (v: any) => string;
+  deltaFormat?: (v: unknown) => string;
   className?: string;
 }) {
   return (
@@ -64,7 +64,7 @@ function SQLDelta({
   format,
 }: {
   query: string;
-  format?: (v: any) => string;
+  format?: (v: unknown) => string;
 }) {
   const sql = useInterpolate(resolveScalar(query));
   const { rows, status } = useQuery(sql);

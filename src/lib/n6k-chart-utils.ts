@@ -50,7 +50,7 @@ function arrowToVegaType(
  * @returns Vega-Lite type string: "temporal", "quantitative", "nominal", or "ordinal".
  */
 export function inferType(
-  schema: Schema<any> | undefined,
+  schema: Schema | undefined,
   fieldName: string,
   role: "x" | "y" | "y2" | "hue" | "size" | "xOffset" | "theta" | "labels",
 ): string {
@@ -167,6 +167,32 @@ function resolveSourceForWrapping(baseSQL: string): string {
  * @param status - Query status string ("ready" triggers render).
  * @param containerRef - React ref to the target DOM element.
  */
+function resolveThemeConfig(
+  el: HTMLElement,
+): Record<string, unknown> {
+  const s = getComputedStyle(el);
+  const fg = s.getPropertyValue("--color-foreground").trim();
+  const muted = s.getPropertyValue("--color-muted-foreground").trim();
+  const border = s.getPropertyValue("--color-border").trim();
+
+  return {
+    background: "transparent",
+    view: { stroke: "transparent" },
+    axis: {
+      domainColor: border || undefined,
+      gridColor: border || undefined,
+      tickColor: border || undefined,
+      labelColor: muted || undefined,
+      titleColor: fg || undefined,
+    },
+    legend: {
+      labelColor: muted || undefined,
+      titleColor: fg || undefined,
+    },
+    title: { color: fg || undefined },
+  };
+}
+
 export function useVegaChart(
   spec: Record<string, unknown>,
   rows: Record<string, unknown>[],
@@ -188,15 +214,16 @@ export function useVegaChart(
     const fullSpec = {
       $schema: "https://vega.github.io/schema/vega-lite/v5.json",
       width: "container",
+      config: resolveThemeConfig(containerRef.current),
       ...spec,
       data: { values: safeRows },
     };
 
-    vegaEmbed(containerRef.current, fullSpec as any, {
+    vegaEmbed(containerRef.current, fullSpec as Record<string, unknown>, {
       actions: false,
       renderer: "svg",
     });
-  }, [status, rows, spec]);
+  }, [status, rows, spec, containerRef]);
 }
 
 // --- Shared chart data hook ---
@@ -281,7 +308,6 @@ export function temporalAxisConfig(
   const max = Math.max(...values);
   const rangeMs = max - min;
 
-  const HOUR = 3600_000;
   const DAY = 86400_000;
   const YEAR = 365.25 * DAY;
 

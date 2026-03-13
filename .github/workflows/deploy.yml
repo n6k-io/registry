@@ -30,6 +30,12 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Lint
+        run: bun lint
+
+      - name: Format check
+        run: bun fmt --check
+
       - name: Build registry
         run: bunx shadcn build
 

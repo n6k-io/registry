@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import duckdb from "duckdb";
 import { buildQuery } from "./build-query";
 
-function query(db: any, sql: string): Promise<Record<string, unknown>[]> {
+function query(db: InstanceType<typeof duckdb.Database>, sql: string): Promise<Record<string, unknown>[]> {
   return new Promise((resolve, reject) => {
     db.all(sql, (err: Error | null, rows: Record<string, unknown>[]) => {
       if (err) reject(err);

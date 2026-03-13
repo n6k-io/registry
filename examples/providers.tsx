@@ -6,7 +6,7 @@ export function ExampleProviders({
   bindings,
 }: {
   children: React.ReactNode;
-  bindings?: Record<string, any>;
+  bindings?: Record<string, unknown>;
 }) {
   return (
     <DuckDBProvider

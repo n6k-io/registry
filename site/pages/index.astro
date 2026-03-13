@@ -9,7 +9,7 @@ const registry = JSON.parse(
 
 const items = registry.items ?? [];
 
-function getCategory(item: any): string {
+function getCategory(item: { type?: string; name: string }): string {
   if (item.type === "registry:lib") return "lib";
   if (
     item.name.startsWith("n6k-") &&
@@ -23,7 +23,7 @@ function getCategory(item: any): string {
   return "ui";
 }
 
-const categorized = items.map((item: any) => ({
+const categorized = items.map((item: { type?: string; name: string; title?: string; description?: string }) => ({
   ...item,
   category: getCategory(item),
 }));
@@ -123,7 +123,7 @@ const categorized = items.map((item: any) => ({
     class="divide-y divide-neutral-200 rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800"
   >
     {
-      categorized.map((item: any) => (
+      categorized.map((item: { name: string; title?: string; description?: string; category: string }) => (
         <a
           href={`/component/${item.name}`}
           class="component-row flex items-center justify-between px-4 py-3 first:rounded-t-lg last:rounded-b-lg hover:bg-neutral-50 dark:hover:bg-neutral-900"

@@ -15,7 +15,7 @@ export interface ResolveDataInput {
 export interface ResolveDataResult {
   rows: Record<string, unknown>[];
   query: string;
-  schema: Schema<any> | undefined;
+  schema: Schema | undefined;
   status: "idle" | "loading" | "ready" | "error";
   error: string | undefined;
 }
@@ -29,25 +29,21 @@ export function useResolveData({
   const reactId = useId();
   const viewPrefix = `__rv${reactId.replace(/[^a-zA-Z0-9]/g, "")}`;
 
-  // Filter undefined entries
-  const dims: Record<string, string> = {};
-  for (const [k, v] of Object.entries(dimensions)) {
-    if (v != null) dims[k] = v;
-  }
-  const meas: Record<string, string> = {};
-  if (measures) {
-    for (const [k, v] of Object.entries(measures)) {
-      if (v != null) meas[k] = v;
+  // Filter undefined entries — memoised so downstream hooks get stable refs
+  const { dims, meas, allEntries, hasSubqueries } = useMemo(() => {
+    const d: Record<string, string> = {};
+    for (const [k, v] of Object.entries(dimensions)) {
+      if (v != null) d[k] = v;
     }
-  }
-
-  const allEntries = [...Object.entries(dims), ...Object.entries(meas)];
-  const hasSubqueries = allEntries.some(([_, f]) => isSubquery(f));
-
-  const inputKey = [...Object.entries(dims), ...Object.entries(meas)]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) => `${k}=${v}`)
-    .join("&");
+    const m: Record<string, string> = {};
+    if (measures) {
+      for (const [k, v] of Object.entries(measures)) {
+        if (v != null) m[k] = v;
+      }
+    }
+    const all = [...Object.entries(d), ...Object.entries(m)];
+    return { dims: d, meas: m, allEntries: all, hasSubqueries: all.some(([, f]) => isSubquery(f)) };
+  }, [dimensions, measures]);
 
   // --- Subquery mode: create views, DESCRIBE, POSITIONAL JOIN ---
   const [viewSql, setViewSql] = useState<string | undefined>(undefined);
@@ -108,7 +104,7 @@ export function useResolveData({
       setViewSql(undefined);
       setViewError(undefined);
     };
-  }, [hasSubqueries, connStatus, inputKey]);
+  }, [hasSubqueries, connStatus, allEntries, conn, viewPrefix]);
 
   // --- Build query ---
   const { rawQuery, buildError } = useMemo(() => {
@@ -120,7 +116,7 @@ export function useResolveData({
     } catch (e) {
       return { rawQuery: "", buildError: (e as Error).message };
     }
-  }, [hasSubqueries, viewSql, data, inputKey]);
+  }, [hasSubqueries, viewSql, data, dims, meas]);
 
   const query = useInterpolate(rawQuery || "SELECT 1 WHERE false");
   const {

@@ -259,6 +259,9 @@ function SimpleBarChart({
     hueOrder,
     palette,
     color,
+    xTitle,
+    yTitle,
+    legend,
     rows,
   ]);
 
@@ -411,6 +414,13 @@ function AggregateBarChart({
     palette,
     color,
     stack,
+    xTitle,
+    yTitle,
+    legend,
+    x,
+    y,
+    estimator,
+    hue,
     rows,
   ]);
 

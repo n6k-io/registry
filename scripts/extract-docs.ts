@@ -1,9 +1,4 @@
-import {
-  Project,
-  SyntaxKind,
-  type FunctionDeclaration,
-  type JSDoc,
-} from "ts-morph";
+import { Project, SyntaxKind } from "ts-morph";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
@@ -66,7 +61,7 @@ for (const item of registry.items) {
         for (const tag of tags) {
           if (tag.getTagName() === "param") {
             const text = tag.getCommentText() || "";
-            const tagNode = tag.compilerNode as any;
+            const tagNode = tag.compilerNode as { name?: { getText?: () => string } };
             let paramName = tagNode.name?.getText?.() || "";
             // Handle "props.xxx" format
             if (paramName.startsWith("props.")) {

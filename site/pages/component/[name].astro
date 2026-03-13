@@ -99,8 +99,8 @@ if (component.registryDependencies) {
 
 // Source files — highlight for the sheet
 const sourceFiles = (component.files ?? [])
-  .filter((f: any) => f.content)
-  .map((f: any) => {
+  .filter((f: { content?: string; path: string }) => f.content)
+  .map((f: { content: string; path: string }) => {
     const lang = f.path.endsWith(".ts")
       ? ("typescript" as const)
       : ("tsx" as const);
@@ -362,7 +362,7 @@ const sourceFiles = (component.files ?? [])
           Examples
         </h2>
         <div class="space-y-6">
-          {additionalExamples.map((ex: any) => (
+          {additionalExamples.map((ex: { title: string; description?: string; globPath: string; filename: string; code: string; html: string }) => (
             <div>
               <h3 class="mb-1 text-sm font-medium text-neutral-900 dark:text-neutral-200">
                 {ex.title}

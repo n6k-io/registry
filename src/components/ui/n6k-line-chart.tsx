@@ -84,7 +84,7 @@ export function N6KLineChart({
       mark: { type: "line" as const },
       encoding,
     };
-  }, [schema, xField, yField, hueField, sort, rows, xTitle, yTitle]);
+  }, [schema, xField, yField, hueField, sort, rows, xTitle, yTitle, legend]);
 
   useVegaChart(spec, rows, status, containerRef);
 

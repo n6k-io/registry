@@ -379,6 +379,7 @@ function AggregateBarChart({
     };
   }, [
     schema,
+    x,
     hue,
     hasError,
     orient,

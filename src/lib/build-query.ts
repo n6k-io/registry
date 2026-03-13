@@ -21,7 +21,7 @@ export function buildQuery(
   const dimEntries = Object.entries(dims);
   const measureEntries = Object.entries(measures);
   const allEntries = [...dimEntries, ...measureEntries];
-  const hasSubqueries = allEntries.some(([_, f]) => isSubquery(f));
+  const hasSubqueries = allEntries.some(([, f]) => isSubquery(f));
 
   if (hasSubqueries) {
     return "";
