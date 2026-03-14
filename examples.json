@@ -26,5 +26,12 @@
       "description": "Bar chart using Recharts + shadcn/ui chart components with hue grouping.",
       "path": "./examples/recharts-bar-chart/bar-chart-01.tsx"
     }
+  ],
+  "recharts-line-chart": [
+    {
+      "title": "Temperature by Month (Recharts)",
+      "description": "Line chart using Recharts + shadcn/ui chart components with hue grouping.",
+      "path": "./examples/recharts-line-chart/line-chart-01.tsx"
+    }
   ]
 }

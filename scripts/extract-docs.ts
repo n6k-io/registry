@@ -51,17 +51,19 @@ for (const item of registry.items) {
     for (const fn of exportedFunctions) {
       const fnName = fn.getName() || "default";
       const jsDocs = fn.getJsDocs();
-      const description =
-        jsDocs.length > 0 ? jsDocs[0].getDescription().trim() : "";
+      const firstDoc = jsDocs[0];
+      const description = firstDoc ? firstDoc.getDescription().trim() : "";
 
       // Extract @param descriptions from JSDoc
       const paramDescriptions = new Map<string, string>();
-      if (jsDocs.length > 0) {
-        const tags = jsDocs[0].getTags();
+      if (firstDoc) {
+        const tags = firstDoc.getTags();
         for (const tag of tags) {
           if (tag.getTagName() === "param") {
             const text = tag.getCommentText() || "";
-            const tagNode = tag.compilerNode as { name?: { getText?: () => string } };
+            const tagNode = tag.compilerNode as {
+              name?: { getText?: () => string };
+            };
             let paramName = tagNode.name?.getText?.() || "";
             // Handle "props.xxx" format
             if (paramName.startsWith("props.")) {
@@ -80,8 +82,8 @@ for (const item of registry.items) {
       const props: PropDoc[] = [];
       const params = fn.getParameters();
 
-      if (params.length > 0) {
-        const firstParam = params[0];
+      const firstParam = params[0];
+      if (firstParam) {
         const paramType = firstParam.getType();
 
         // Check if it's a destructured object parameter

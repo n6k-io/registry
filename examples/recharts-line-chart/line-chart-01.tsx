@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ExampleProviders } from "../providers";
-import { RechartsBarChart } from "@/components/ui/recharts-bar-chart";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RechartsLineChart } from "@/components/ui/recharts-line-chart";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -11,23 +10,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const X_OPTIONS = [
-  { label: "month(date)", value: "month(date)" },
-  { label: "year(date)", value: "year(date)" },
-  { label: "weather", value: "weather" },
-];
+const X_OPTIONS = [{ label: "date", value: "date" }];
 
 const Y_OPTIONS = [
-  { label: "sum(precipitation)", value: "sum(precipitation)" },
-  { label: "avg(temp_max)", value: "avg(temp_max)" },
-  { label: "avg(temp_min)", value: "avg(temp_min)" },
-  { label: "avg(wind)", value: "avg(wind)" },
-  { label: "count(*)", value: "count(*)" },
+  { label: "temp_max", value: "temp_max" },
+  { label: "temp_min", value: "temp_min" },
+  { label: "wind", value: "wind" },
+  { label: "precipitation", value: "precipitation" },
 ];
 
 const HUE_OPTIONS = [
   { label: "None", value: "__none" },
-  { label: "year(date)", value: "year(date)" },
   { label: "weather", value: "weather" },
 ];
 
@@ -44,11 +37,10 @@ const PALETTES: Record<string, string[]> = {
   pastel: ["#b3cde3", "#ccebc5", "#decbe4", "#fed9a6", "#fbb4ae"],
 };
 
-export default function BarChart01() {
-  const [x, setX] = useState("month(date)");
-  const [y, setY] = useState("sum(precipitation)");
-  const [hue, setHue] = useState("year(date)");
-  const [stacked, setStacked] = useState(false);
+export default function LineChart01() {
+  const [x, setX] = useState("date");
+  const [y, setY] = useState("temp_max");
+  const [hue, setHue] = useState("__none");
   const [palette, setPalette] = useState("default");
 
   const colors = PALETTES[palette] ?? PALETTES["default"]!;
@@ -60,7 +52,7 @@ export default function BarChart01() {
   return (
     <ExampleProviders>
       <div className="space-y-6 p-8">
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <div className="space-y-2">
             <Label>X Axis</Label>
             <Select value={x} onValueChange={setX}>
@@ -106,14 +98,6 @@ export default function BarChart01() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-end space-x-2 pb-2">
-            <Checkbox
-              id="stacked"
-              checked={stacked}
-              onCheckedChange={(v) => setStacked(v === true)}
-            />
-            <Label htmlFor="stacked">Stacked</Label>
-          </div>
           <div className="space-y-2">
             <Label>Palette</Label>
             <Select value={palette} onValueChange={setPalette}>
@@ -132,12 +116,11 @@ export default function BarChart01() {
         </div>
 
         <div style={chartVars}>
-          <RechartsBarChart
+          <RechartsLineChart
             data="db.seattle_weather"
             x={x}
             y={y}
             hue={hue === "__none" ? undefined : hue}
-            stack={stacked}
           />
         </div>
       </div>

@@ -290,6 +290,20 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "recharts-line-chart",
+      "type": "registry:ui",
+      "title": "Recharts Line Chart",
+      "description": "Line chart using Recharts + shadcn/ui chart with hue grouping and DuckDB data.",
+      "dependencies": ["recharts"],
+      "registryDependencies": ["chart", "@n6k/use-resolve-data"],
+      "files": [
+        {
+          "path": "src/components/ui/recharts-line-chart.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
