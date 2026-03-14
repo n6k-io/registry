@@ -25,11 +25,11 @@ test("dimensions + measures produces correct aggregated results from DuckDB", as
     `INSERT INTO precip VALUES ('Jan', 2024, 40), ('Jan', 2024, 60), ('Jan', 2025, 30), ('Feb', 2024, 50)`,
   );
 
-  const sql = buildQuery(
-    "precip",
-    { x: "month", hue: "year" },
-    { y: "SUM(precipitation)" },
-  );
+  const sql = buildQuery("precip", {
+    x: "month",
+    hue: "year",
+    y: "SUM(precipitation)",
+  });
 
   const rows = await query(db, sql);
   expect(rows).toEqual(
@@ -50,11 +50,10 @@ test("estimatorToSQL produces correct aggregates", async () => {
     `INSERT INTO vals VALUES ('a', 10), ('a', 20), ('a', 30), ('b', 100)`,
   );
 
-  const sql = buildQuery(
-    "vals",
-    { g: "g" },
-    { y: estimatorToSQL("mean", "v") },
-  );
+  const sql = buildQuery("vals", {
+    g: "g",
+    y: estimatorToSQL("mean", "v"),
+  });
   const rows = await query(db, sql);
   expect(rows).toEqual(
     expect.arrayContaining([
@@ -70,15 +69,12 @@ test("errorbarToSQL produces lo/hi columns", async () => {
   await query(db, `INSERT INTO vals VALUES ('a', 10), ('a', 20), ('a', 30)`);
 
   const { lo, hi } = errorbarToSQL("sd", "mean", "v");
-  const sql = buildQuery(
-    "vals",
-    { g: "g" },
-    {
-      y: estimatorToSQL("mean", "v"),
-      lo,
-      hi,
-    },
-  );
+  const sql = buildQuery("vals", {
+    g: "g",
+    y: estimatorToSQL("mean", "v"),
+    lo,
+    hi,
+  });
   const rows = await query(db, sql);
   expect(rows.length).toBe(1);
   const row = rows[0] as { g: string; y: number; lo: number; hi: number };
@@ -86,4 +82,27 @@ test("errorbarToSQL produces lo/hi columns", async () => {
   expect(row.y).toBeCloseTo(20, 5);
   expect(row.lo).toBeLessThan(row.y);
   expect(row.hi).toBeGreaterThan(row.y);
+});
+
+test("all-dimension fields produce no GROUP BY", async () => {
+  const db = new duckdb.Database(":memory:");
+  await query(db, `CREATE TABLE raw (dt DATE, temp DOUBLE)`);
+  await query(
+    db,
+    `INSERT INTO raw VALUES ('2024-01-01', 10), ('2024-01-02', 20)`,
+  );
+
+  const sql = buildQuery("raw", { x: "dt", y: "temp" });
+  expect(sql).not.toContain("GROUP BY");
+
+  const rows = await query(db, sql);
+  expect(rows.length).toBe(2);
+});
+
+test("explicit role override works", () => {
+  const sql = buildQuery("t", {
+    x: "category",
+    y: { expr: "CASE WHEN x > 0 THEN SUM(v) ELSE 0 END", role: "measure" },
+  });
+  expect(sql).toContain("GROUP BY");
 });

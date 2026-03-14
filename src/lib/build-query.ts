@@ -1,16 +1,33 @@
-export type Field = string;
+export type Field = string | { expr: string; role: "measure" | "dimension" };
+
+export type FieldDef = {
+  role: "dimension" | "measure" | "both";
+  cardinality?: "low" | "high" | "any";
+};
+
+const AGG_RE = /^(sum|avg|count|min|max|median|stddev|variance|percentile_cont|percentile_disc)\s*\(/i;
+
+export function isAggregate(field: Field): boolean {
+  if (typeof field === "object") return field.role === "measure";
+  return AGG_RE.test(field.trim());
+}
+
+export function fieldExpr(field: Field): string {
+  return typeof field === "object" ? field.expr : field;
+}
 
 export function isColumnName(s: string): boolean {
   return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(s);
 }
 
-export function isSubquery(s: string): boolean {
+export function isSubquery(field: Field): boolean {
+  const s = fieldExpr(field);
   return s.trimStart().toUpperCase().startsWith("SELECT");
 }
 
-function fieldToSelect(role: string, field: string): string {
-  if (isColumnName(field)) return `"${field}" AS "${role}"`;
-  return `(${field}) AS "${role}"`;
+function fieldToSelect(role: string, expr: string): string {
+  if (isColumnName(expr)) return `"${expr}" AS "${role}"`;
+  return `(${expr}) AS "${role}"`;
 }
 
 export type Estimator = "mean" | "sum" | "count" | "median" | "min" | "max";
@@ -60,33 +77,34 @@ export function errorbarToSQL(
 
 export function buildQuery(
   data: string | undefined,
-  dims: Record<string, string>,
-  measures: Record<string, string>,
+  fields: Record<string, Field>,
 ): string {
-  const dimEntries = Object.entries(dims);
-  const measureEntries = Object.entries(measures);
-  const allEntries = [...dimEntries, ...measureEntries];
-  const hasSubqueries = allEntries.some(([, f]) => isSubquery(f));
+  const entries = Object.entries(fields);
+  const hasSubqueries = entries.some(([, f]) => isSubquery(f));
 
   if (hasSubqueries) {
     return "";
   }
 
-  if (!data && allEntries.length > 0) {
+  if (!data && entries.length > 0) {
     throw new Error(
       "'data' is required when fields are columns or expressions",
     );
   }
 
-  if (allEntries.length === 0) {
+  if (entries.length === 0) {
     return data ? `SELECT * FROM ${data}` : "";
   }
 
-  const selects = allEntries.map(([role, field]) => fieldToSelect(role, field));
+  const selects = entries.map(([role, field]) => fieldToSelect(role, fieldExpr(field)));
   let sql = `SELECT ${selects.join(", ")} FROM ${data}`;
 
-  if (measureEntries.length > 0 && dimEntries.length > 0) {
-    sql += ` GROUP BY ${dimEntries.map(([role]) => `"${role}"`).join(", ")}`;
+  const hasAgg = entries.some(([, f]) => isAggregate(f));
+  if (hasAgg) {
+    const groupByFields = entries.filter(([, f]) => !isAggregate(f));
+    if (groupByFields.length > 0) {
+      sql += ` GROUP BY ${groupByFields.map(([role]) => `"${role}"`).join(", ")}`;
+    }
   }
 
   return sql;

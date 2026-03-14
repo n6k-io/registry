@@ -2,14 +2,13 @@ import { useState, useEffect, useId, useMemo } from "react";
 import { useDuckDB, useQuery } from "@n6k.io/db/react";
 import { useInterpolate } from "@n6k.io/ui";
 import type { Schema } from "apache-arrow";
-import { buildQuery, isSubquery, type Field } from "@/lib/build-query";
+import { buildQuery, fieldExpr, isSubquery, type Field } from "@/lib/build-query";
 
-export { isColumnName, type Field } from "@/lib/build-query";
+export { isColumnName, isAggregate, fieldExpr, type Field, type FieldDef } from "@/lib/build-query";
 
 export interface ResolveDataInput {
   data?: string;
-  dimensions: Record<string, Field | undefined>;
-  measures?: Record<string, Field | undefined>;
+  fields: Record<string, Field | undefined>;
 }
 
 export interface ResolveDataResult {
@@ -22,33 +21,25 @@ export interface ResolveDataResult {
 
 export function useResolveData({
   data,
-  dimensions,
-  measures,
+  fields,
 }: ResolveDataInput): ResolveDataResult {
   const { conn, status: connStatus } = useDuckDB();
   const reactId = useId();
   const viewPrefix = `__rv${reactId.replace(/[^a-zA-Z0-9]/g, "")}`;
 
   // Filter undefined entries — memoised so downstream hooks get stable refs
-  const { dims, meas, allEntries, hasSubqueries } = useMemo(() => {
-    const d: Record<string, string> = {};
-    for (const [k, v] of Object.entries(dimensions)) {
-      if (v != null) d[k] = v;
+  const { cleaned, allEntries, hasSubqueries } = useMemo(() => {
+    const c: Record<string, Field> = {};
+    for (const [k, v] of Object.entries(fields)) {
+      if (v != null) c[k] = v;
     }
-    const m: Record<string, string> = {};
-    if (measures) {
-      for (const [k, v] of Object.entries(measures)) {
-        if (v != null) m[k] = v;
-      }
-    }
-    const all = [...Object.entries(d), ...Object.entries(m)];
+    const all = Object.entries(c);
     return {
-      dims: d,
-      meas: m,
+      cleaned: c,
       allEntries: all,
       hasSubqueries: all.some(([, f]) => isSubquery(f)),
     };
-  }, [dimensions, measures]);
+  }, [fields]);
 
   // --- Subquery mode: create views, DESCRIBE, POSITIONAL JOIN ---
   const [viewSql, setViewSql] = useState<string | undefined>(undefined);
@@ -72,7 +63,7 @@ export function useResolveData({
         const name = `${viewPrefix}_${role}`;
         viewNames.push(name);
         await db.query(
-          `CREATE OR REPLACE TEMPORARY VIEW "${name}" AS ${field}`,
+          `CREATE OR REPLACE TEMPORARY VIEW "${name}" AS ${fieldExpr(field)}`,
         );
       }
 
@@ -118,11 +109,11 @@ export function useResolveData({
       return { rawQuery: viewSql || "", buildError: undefined };
     }
     try {
-      return { rawQuery: buildQuery(data, dims, meas), buildError: undefined };
+      return { rawQuery: buildQuery(data, cleaned), buildError: undefined };
     } catch (e) {
       return { rawQuery: "", buildError: (e as Error).message };
     }
-  }, [hasSubqueries, viewSql, data, dims, meas]);
+  }, [hasSubqueries, viewSql, data, cleaned]);
 
   const query = useInterpolate(rawQuery || "SELECT 1 WHERE false");
   const {

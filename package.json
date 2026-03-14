@@ -29,7 +29,7 @@
     "@duckdb/duckdb-wasm": "^1.33.1-dev20.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@n6k.io/db": "^0.1.1",
-    "@n6k.io/ui": "^0.2.0",
+    "@n6k.io/ui": "^0.3.0",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.22",

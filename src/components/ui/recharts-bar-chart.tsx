@@ -8,7 +8,8 @@ import {
   ChartLegendContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { useResolveData, type Field } from "@/lib/use-resolve-data";
+import { useResolveData, type Field, type FieldDef } from "@/lib/use-resolve-data";
+import { BarChart3Icon } from "lucide-react";
 
 const PALETTE = [
   "var(--chart-1)",
@@ -39,8 +40,7 @@ export function RechartsBarChart({
 }: RechartsBarChartProps) {
   const { rows, status, error } = useResolveData({
     data,
-    dimensions: { x, hue },
-    measures: { y },
+    fields: { x, y, hue },
   });
 
   // Pivot rows for Recharts: one object per x-value with hue values as keys
@@ -139,3 +139,11 @@ export function RechartsBarChart({
     </ChartContainer>
   );
 }
+
+RechartsBarChart.fieldDefs = {
+  x: { role: "dimension", cardinality: "low" },
+  y: { role: "measure", cardinality: "any" },
+  hue: { role: "dimension", cardinality: "low" },
+} satisfies Record<string, FieldDef>;
+
+RechartsBarChart.icon = BarChart3Icon;

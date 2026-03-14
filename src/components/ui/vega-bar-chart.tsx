@@ -106,7 +106,7 @@ function SimpleBarChart({
 
   const { rows, schema, status, error } = useResolveData({
     data,
-    dimensions: { x, y, y2, hue, xOffset },
+    fields: { x, y, y2, hue, xOffset },
   });
 
   const shouldDodge = dodge ?? (!!hue && !stack);
@@ -239,8 +239,7 @@ function AggregateBarChart({
 
   const { rows, schema, status, error } = useResolveData({
     data,
-    dimensions,
-    measures,
+    fields: { ...dimensions, ...measures },
   });
 
   const shouldDodge = dodge ?? (!!hue && !stack);

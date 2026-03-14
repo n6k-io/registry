@@ -22,16 +22,26 @@
   ],
   "recharts-bar-chart": [
     {
-      "title": "Precipitation by Month (Recharts)",
-      "description": "Bar chart using Recharts + shadcn/ui chart components with hue grouping.",
+      "title": "Basic",
+      "description": "Precipitation by month with year hue grouping.",
       "path": "./examples/recharts-bar-chart/bar-chart-01.tsx"
+    },
+    {
+      "title": "Interactive",
+      "description": "Configurable axes, hue, stacking, and palette.",
+      "path": "./examples/recharts-bar-chart/bar-chart-02.tsx"
     }
   ],
   "recharts-line-chart": [
     {
-      "title": "Temperature by Month (Recharts)",
-      "description": "Line chart using Recharts + shadcn/ui chart components with hue grouping.",
+      "title": "Basic",
+      "description": "Daily max temperature time series.",
       "path": "./examples/recharts-line-chart/line-chart-01.tsx"
+    },
+    {
+      "title": "Interactive",
+      "description": "Configurable axes, hue, and palette.",
+      "path": "./examples/recharts-line-chart/line-chart-02.tsx"
     }
   ]
 }
