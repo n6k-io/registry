@@ -14,6 +14,7 @@ export function SourceViewer({ files }: { files: SourceFile[] }) {
   if (files.length === 0) return null;
 
   const active = files[activeIndex];
+  if (!active) return null;
 
   const copy = () => {
     navigator.clipboard.writeText(active.code).then(() => {

@@ -2,7 +2,10 @@ import { expect, test } from "bun:test";
 import duckdb from "duckdb";
 import { buildQuery, estimatorToSQL, errorbarToSQL } from "./build-query";
 
-function query(db: InstanceType<typeof duckdb.Database>, sql: string): Promise<Record<string, unknown>[]> {
+function query(
+  db: InstanceType<typeof duckdb.Database>,
+  sql: string,
+): Promise<Record<string, unknown>[]> {
   return new Promise((resolve, reject) => {
     db.all(sql, (err: Error | null, rows: Record<string, unknown>[]) => {
       if (err) reject(err);
@@ -42,9 +45,16 @@ test("dimensions + measures produces correct aggregated results from DuckDB", as
 test("estimatorToSQL produces correct aggregates", async () => {
   const db = new duckdb.Database(":memory:");
   await query(db, `CREATE TABLE vals (g VARCHAR, v DOUBLE)`);
-  await query(db, `INSERT INTO vals VALUES ('a', 10), ('a', 20), ('a', 30), ('b', 100)`);
+  await query(
+    db,
+    `INSERT INTO vals VALUES ('a', 10), ('a', 20), ('a', 30), ('b', 100)`,
+  );
 
-  const sql = buildQuery("vals", { g: "g" }, { y: estimatorToSQL("mean", "v") });
+  const sql = buildQuery(
+    "vals",
+    { g: "g" },
+    { y: estimatorToSQL("mean", "v") },
+  );
   const rows = await query(db, sql);
   expect(rows).toEqual(
     expect.arrayContaining([
@@ -60,11 +70,15 @@ test("errorbarToSQL produces lo/hi columns", async () => {
   await query(db, `INSERT INTO vals VALUES ('a', 10), ('a', 20), ('a', 30)`);
 
   const { lo, hi } = errorbarToSQL("sd", "mean", "v");
-  const sql = buildQuery("vals", { g: "g" }, {
-    y: estimatorToSQL("mean", "v"),
-    lo,
-    hi,
-  });
+  const sql = buildQuery(
+    "vals",
+    { g: "g" },
+    {
+      y: estimatorToSQL("mean", "v"),
+      lo,
+      hi,
+    },
+  );
   const rows = await query(db, sql);
   expect(rows.length).toBe(1);
   const row = rows[0] as { g: string; y: number; lo: number; hi: number };

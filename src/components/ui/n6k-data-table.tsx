@@ -143,6 +143,7 @@ export function DataTable({
                 />
                 {virtualizer.getVirtualItems().map((virtualRow) => {
                   const row = tableRows[virtualRow.index];
+                  if (!row) return null;
                   return (
                     <tr
                       key={row.id}

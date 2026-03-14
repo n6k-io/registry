@@ -42,7 +42,12 @@ export function useResolveData({
       }
     }
     const all = [...Object.entries(d), ...Object.entries(m)];
-    return { dims: d, meas: m, allEntries: all, hasSubqueries: all.some(([, f]) => isSubquery(f)) };
+    return {
+      dims: d,
+      meas: m,
+      allEntries: all,
+      hasSubqueries: all.some(([, f]) => isSubquery(f)),
+    };
   }, [dimensions, measures]);
 
   // --- Subquery mode: create views, DESCRIBE, POSITIONAL JOIN ---
@@ -53,6 +58,7 @@ export function useResolveData({
     if (!hasSubqueries) return;
     if (connStatus !== "ready" || !conn) return;
 
+    const db = conn;
     let cancelled = false;
     const viewNames: string[] = [];
 
@@ -65,7 +71,7 @@ export function useResolveData({
         }
         const name = `${viewPrefix}_${role}`;
         viewNames.push(name);
-        await conn.query(
+        await db.query(
           `CREATE OR REPLACE TEMPORARY VIEW "${name}" AS ${field}`,
         );
       }
@@ -73,7 +79,7 @@ export function useResolveData({
       const parts: string[] = [];
       for (const [role] of allEntries) {
         const name = `${viewPrefix}_${role}`;
-        const desc = await conn.query(`DESCRIBE "${name}"`);
+        const desc = await db.query(`DESCRIBE "${name}"`);
         const colName = desc.toArray()[0]?.toJSON()?.column_name;
         parts.push(`(SELECT "${colName}" AS "${role}" FROM "${name}")`);
       }
@@ -99,7 +105,7 @@ export function useResolveData({
     return () => {
       cancelled = true;
       for (const name of viewNames) {
-        conn.query(`DROP VIEW IF EXISTS "${name}"`).catch(() => {});
+        db.query(`DROP VIEW IF EXISTS "${name}"`).catch(() => {});
       }
       setViewSql(undefined);
       setViewError(undefined);
@@ -167,5 +173,5 @@ export function useResolveData({
     };
   }
 
-  return { rows, query, schema, status: qStatus, error: qError };
+  return { rows, query, schema, status: qStatus, error: qError ?? undefined };
 }

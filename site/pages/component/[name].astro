@@ -362,31 +362,40 @@ const sourceFiles = (component.files ?? [])
           Examples
         </h2>
         <div class="space-y-6">
-          {additionalExamples.map((ex: { title: string; description?: string; globPath: string; filename: string; code: string; html: string }) => (
-            <div>
-              <h3 class="mb-1 text-sm font-medium text-neutral-900 dark:text-neutral-200">
-                {ex.title}
-              </h3>
-              {ex.description && (
-                <p class="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
-                  {ex.description}
-                </p>
-              )}
-              <div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
-                <div class="bg-neutral-50 dark:bg-neutral-900">
-                  <ExampleRenderer examplePath={ex.globPath} client:load />
-                </div>
-                <div class="flex items-center justify-end border-t border-neutral-200 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-950">
-                  <CodeViewer
-                    code={ex.code}
-                    html={ex.html}
-                    filename={ex.filename}
-                    client:load
-                  />
+          {additionalExamples.map(
+            (ex: {
+              title: string;
+              description?: string;
+              globPath: string;
+              filename: string;
+              code: string;
+              html: string;
+            }) => (
+              <div>
+                <h3 class="mb-1 text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                  {ex.title}
+                </h3>
+                {ex.description && (
+                  <p class="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
+                    {ex.description}
+                  </p>
+                )}
+                <div class="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800">
+                  <div class="bg-neutral-50 dark:bg-neutral-900">
+                    <ExampleRenderer examplePath={ex.globPath} client:load />
+                  </div>
+                  <div class="flex items-center justify-end border-t border-neutral-200 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-950">
+                    <CodeViewer
+                      code={ex.code}
+                      html={ex.html}
+                      filename={ex.filename}
+                      client:load
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </section>
     )

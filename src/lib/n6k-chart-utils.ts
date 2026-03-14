@@ -167,9 +167,7 @@ function resolveSourceForWrapping(baseSQL: string): string {
  * @param status - Query status string ("ready" triggers render).
  * @param containerRef - React ref to the target DOM element.
  */
-function resolveThemeConfig(
-  el: HTMLElement,
-): Record<string, unknown> {
+function resolveThemeConfig(el: HTMLElement): Record<string, unknown> {
   const s = getComputedStyle(el);
   const fg = s.getPropertyValue("--color-foreground").trim();
   const muted = s.getPropertyValue("--color-muted-foreground").trim();
@@ -324,4 +322,3 @@ export function temporalAxisConfig(
 
   return { format };
 }
-

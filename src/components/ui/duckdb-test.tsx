@@ -9,7 +9,9 @@ export function DuckdbTest() {
   const [sql, setSql] = useState(
     "SELECT * FROM n6k('http://127.0.0.1:8000/tables/demo');",
   );
-  const [results, setResults] = useState<Record<string, unknown>[] | null>(null);
+  const [results, setResults] = useState<Record<string, unknown>[] | null>(
+    null,
+  );
   const [queryError, setQueryError] = useState<string | null>(null);
   const [extensionLoaded, setExtensionLoaded] = useState(false);
 
@@ -30,7 +32,9 @@ export function DuckdbTest() {
       setQueryError(null);
       setResults(null);
       const result = await conn.query(sql);
-      const rows = result.toArray().map((r: { toJSON: () => Record<string, unknown> }) => r.toJSON());
+      const rows = result
+        .toArray()
+        .map((r: { toJSON: () => Record<string, unknown> }) => r.toJSON());
       setResults(rows);
     } catch (e) {
       setQueryError((e as Error).message);

@@ -5,10 +5,7 @@ import {
   temporalAxisConfig,
   type LegendOrient,
 } from "@/lib/n6k-chart-utils";
-import {
-  useResolveData,
-  type Field,
-} from "@/lib/use-resolve-data";
+import { useResolveData, type Field } from "@/lib/use-resolve-data";
 import {
   estimatorToSQL,
   errorbarToSQL,
@@ -55,17 +52,21 @@ interface BarChartBaseProps {
  * @param props.yTitle - Custom y-axis title.
  * @param props.legend - Legend position or "none".
  */
-export function VegaBarChart(props: BarChartBaseProps & {
-  y2?: Field;
-  xOffset?: Field;
-  aggregate?: string;
-  estimator?: Estimator;
-  errorbar?: ErrorBar | null;
-}) {
+export function VegaBarChart(
+  props: BarChartBaseProps & {
+    y2?: Field;
+    xOffset?: Field;
+    aggregate?: string;
+    estimator?: Estimator;
+    errorbar?: ErrorBar | null;
+  },
+) {
   const isAggregateMode = !!(props.estimator || props.errorbar);
   if (isAggregateMode) {
     if (props.y2 || props.xOffset) {
-      throw new Error("y2 and xOffset are not supported with estimator/errorbar");
+      throw new Error(
+        "y2 and xOffset are not supported with estimator/errorbar",
+      );
     }
     return (
       <AggregateBarChart {...props} estimator={props.estimator || "mean"} />
@@ -329,6 +330,7 @@ function AggregateBarChart({
     stack,
     xTitle,
     yTitle,
+    defaultYLabel,
     legend,
     rows,
   ]);

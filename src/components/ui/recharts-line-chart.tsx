@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -18,25 +18,23 @@ const PALETTE = [
   "var(--chart-5)",
 ];
 
-interface RechartsBarChartProps {
+interface RechartsLineChartProps {
   data?: string;
   x: Field;
   y: Field;
   hue?: Field;
   xTitle?: string;
   yTitle?: string;
-  stack?: boolean;
 }
 
-export function RechartsBarChart({
+export function RechartsLineChart({
   data,
   x,
   y,
   hue,
   xTitle,
   yTitle,
-  stack,
-}: RechartsBarChartProps) {
+}: RechartsLineChartProps) {
   const { rows, status, error } = useResolveData({
     data,
     dimensions: { x, hue },
@@ -96,7 +94,7 @@ export function RechartsBarChart({
 
   return (
     <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-      <BarChart data={pivoted} accessibilityLayer>
+      <LineChart data={pivoted} accessibilityLayer>
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey="x"
@@ -127,15 +125,16 @@ export function RechartsBarChart({
         <ChartTooltip content={<ChartTooltipContent />} />
         <ChartLegend content={<ChartLegendContent />} />
         {hueKeys.map((key) => (
-          <Bar
+          <Line
             key={key}
             dataKey={key}
-            fill={`var(--color-${key})`}
-            radius={[4, 4, 0, 0]}
-            stackId={stack ? "stack" : undefined}
+            type="monotone"
+            stroke={`var(--color-${key})`}
+            strokeWidth={2}
+            dot={false}
           />
         ))}
-      </BarChart>
+      </LineChart>
     </ChartContainer>
   );
 }

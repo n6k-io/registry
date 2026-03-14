@@ -23,10 +23,17 @@ function getCategory(item: { type?: string; name: string }): string {
   return "ui";
 }
 
-const categorized = items.map((item: { type?: string; name: string; title?: string; description?: string }) => ({
-  ...item,
-  category: getCategory(item),
-}));
+const categorized = items.map(
+  (item: {
+    type?: string;
+    name: string;
+    title?: string;
+    description?: string;
+  }) => ({
+    ...item,
+    category: getCategory(item),
+  }),
+);
 ---
 
 <Base title={registry.name}>
@@ -45,7 +52,8 @@ const categorized = items.map((item: { type?: string; name: string; title?: stri
     <p class="mb-3 text-sm text-neutral-600 dark:text-neutral-400">
       Add the registry to your <code
         class="rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-xs dark:border-neutral-800 dark:bg-neutral-900"
-        >components.json</code>
+        >components.json</code
+      >
     </p>
     <div class="group relative">
       <pre
@@ -123,34 +131,41 @@ const categorized = items.map((item: { type?: string; name: string; title?: stri
     class="divide-y divide-neutral-200 rounded-lg border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800"
   >
     {
-      categorized.map((item: { name: string; title?: string; description?: string; category: string }) => (
-        <a
-          href={`/component/${item.name}`}
-          class="component-row flex items-center justify-between px-4 py-3 first:rounded-t-lg last:rounded-b-lg hover:bg-neutral-50 dark:hover:bg-neutral-900"
-          data-category={item.category}
-          data-name={item.name.toLowerCase()}
-          data-title={(item.title || item.name).toLowerCase()}
-          data-description={(item.description || "").toLowerCase()}
-        >
-          <div class="min-w-0">
-            <span class="text-sm font-medium text-neutral-900 dark:text-neutral-200">
-              {item.title || item.name}
-            </span>
-            <span class="ml-3 truncate text-sm text-neutral-400 dark:text-neutral-500">
-              {item.description}
-            </span>
-          </div>
-          <svg
-            class="ml-4 h-4 w-4 shrink-0 text-neutral-400 dark:text-neutral-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
+      categorized.map(
+        (item: {
+          name: string;
+          title?: string;
+          description?: string;
+          category: string;
+        }) => (
+          <a
+            href={`/component/${item.name}`}
+            class="component-row flex items-center justify-between px-4 py-3 first:rounded-t-lg last:rounded-b-lg hover:bg-neutral-50 dark:hover:bg-neutral-900"
+            data-category={item.category}
+            data-name={item.name.toLowerCase()}
+            data-title={(item.title || item.name).toLowerCase()}
+            data-description={(item.description || "").toLowerCase()}
           >
-            <path d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      ))
+            <div class="min-w-0">
+              <span class="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                {item.title || item.name}
+              </span>
+              <span class="ml-3 truncate text-sm text-neutral-400 dark:text-neutral-500">
+                {item.description}
+              </span>
+            </div>
+            <svg
+              class="ml-4 h-4 w-4 shrink-0 text-neutral-400 dark:text-neutral-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        ),
+      )
     }
   </div>
 
