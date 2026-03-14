@@ -181,20 +181,6 @@
       ]
     },
     {
-      "name": "n6k-bar-chart",
-      "type": "registry:ui",
-      "title": "N6K Bar Chart",
-      "description": "Bar chart with aggregation, error bars, dodge, and hue support.",
-      "dependencies": ["@n6k.io/ui", "apache-arrow", "vega-embed"],
-      "registryDependencies": ["@n6k/n6k-chart-utils"],
-      "files": [
-        {
-          "path": "src/components/ui/n6k-bar-chart.tsx",
-          "type": "registry:ui"
-        }
-      ]
-    },
-    {
       "name": "use-resolve-data",
       "type": "registry:lib",
       "title": "useResolveData",

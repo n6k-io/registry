@@ -7,12 +7,31 @@ import {
 } from "@/lib/n6k-chart-utils";
 import {
   useResolveData,
-  isColumnName,
   type Field,
 } from "@/lib/use-resolve-data";
+import {
+  estimatorToSQL,
+  errorbarToSQL,
+  type Estimator,
+  type ErrorBar,
+} from "@/lib/build-query";
 
-type Estimator = "mean" | "sum" | "count" | "median" | "min" | "max";
-type ErrorBar = "ci" | "sd" | "se" | "pi";
+interface BarChartBaseProps {
+  data?: string;
+  x: Field;
+  y: Field;
+  hue?: Field;
+  orient?: "v" | "h";
+  dodge?: boolean;
+  order?: string[];
+  hueOrder?: string[];
+  palette?: string[];
+  color?: string;
+  xTitle?: string;
+  yTitle?: string;
+  legend?: LegendOrient;
+  stack?: boolean | "normalize";
+}
 
 /**
  * Bar chart powered by Vega-Lite with a Field-based API.
@@ -36,29 +55,18 @@ type ErrorBar = "ci" | "sd" | "se" | "pi";
  * @param props.yTitle - Custom y-axis title.
  * @param props.legend - Legend position or "none".
  */
-export function VegaBarChart(props: {
-  data?: string;
-  x: Field;
-  y: Field;
+export function VegaBarChart(props: BarChartBaseProps & {
   y2?: Field;
-  hue?: Field;
   xOffset?: Field;
-  stack?: boolean | "normalize";
   aggregate?: string;
   estimator?: Estimator;
   errorbar?: ErrorBar | null;
-  orient?: "v" | "h";
-  dodge?: boolean;
-  order?: string[];
-  hueOrder?: string[];
-  palette?: string[];
-  color?: string;
-  xTitle?: string;
-  yTitle?: string;
-  legend?: LegendOrient;
 }) {
   const isAggregateMode = !!(props.estimator || props.errorbar);
   if (isAggregateMode) {
+    if (props.y2 || props.xOffset) {
+      throw new Error("y2 and xOffset are not supported with estimator/errorbar");
+    }
     return (
       <AggregateBarChart {...props} estimator={props.estimator || "mean"} />
     );
@@ -88,24 +96,10 @@ function SimpleBarChart({
   xTitle,
   yTitle,
   legend,
-}: {
-  data?: string;
-  x: Field;
-  y: Field;
+}: BarChartBaseProps & {
   y2?: Field;
-  hue?: Field;
   xOffset?: Field;
-  stack?: boolean | "normalize";
   aggregate?: string;
-  orient?: "v" | "h";
-  dodge?: boolean;
-  order?: string[];
-  hueOrder?: string[];
-  palette?: string[];
-  color?: string;
-  xTitle?: string;
-  yTitle?: string;
-  legend?: LegendOrient;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -207,48 +201,6 @@ function SimpleBarChart({
 // Aggregate bar chart (estimator / errorbar)
 // ---------------------------------------------------------------------------
 
-function estimatorToSQL(estimator: Estimator, yField: string): string {
-  const col = isColumnName(yField) ? `"${yField}"` : `(${yField})`;
-  switch (estimator) {
-    case "mean":
-      return `AVG(${col})`;
-    case "sum":
-      return `SUM(${col})`;
-    case "count":
-      return `COUNT(${col})`;
-    case "median":
-      return `MEDIAN(${col})`;
-    case "min":
-      return `MIN(${col})`;
-    case "max":
-      return `MAX(${col})`;
-  }
-}
-
-function errorbarToSQL(
-  errorbar: ErrorBar,
-  estimator: Estimator,
-  yField: string,
-): { lo: string; hi: string } {
-  const col = isColumnName(yField) ? `"${yField}"` : `(${yField})`;
-  const agg = estimatorToSQL(estimator, yField);
-  switch (errorbar) {
-    case "sd":
-      return { lo: `${agg} - STDDEV(${col})`, hi: `${agg} + STDDEV(${col})` };
-    case "se":
-      return {
-        lo: `${agg} - STDDEV(${col}) / SQRT(COUNT(${col}))`,
-        hi: `${agg} + STDDEV(${col}) / SQRT(COUNT(${col}))`,
-      };
-    case "ci":
-    case "pi":
-      return {
-        lo: `PERCENTILE_CONT(0.025) WITHIN GROUP (ORDER BY ${col})`,
-        hi: `PERCENTILE_CONT(0.975) WITHIN GROUP (ORDER BY ${col})`,
-      };
-  }
-}
-
 function AggregateBarChart({
   data,
   x,
@@ -266,23 +218,9 @@ function AggregateBarChart({
   xTitle,
   yTitle,
   legend,
-}: {
-  data?: string;
-  x: Field;
-  y: Field;
-  hue?: Field;
+}: BarChartBaseProps & {
   estimator: Estimator;
   errorbar?: ErrorBar | null;
-  orient?: "v" | "h";
-  dodge?: boolean;
-  order?: string[];
-  hueOrder?: string[];
-  palette?: string[];
-  color?: string;
-  stack?: boolean | "normalize";
-  xTitle?: string;
-  yTitle?: string;
-  legend?: LegendOrient;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -392,7 +330,6 @@ function AggregateBarChart({
     xTitle,
     yTitle,
     legend,
-    defaultYLabel,
     rows,
   ]);
 

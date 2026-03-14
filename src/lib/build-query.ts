@@ -13,6 +13,51 @@ function fieldToSelect(role: string, field: string): string {
   return `(${field}) AS "${role}"`;
 }
 
+export type Estimator = "mean" | "sum" | "count" | "median" | "min" | "max";
+export type ErrorBar = "ci" | "sd" | "se" | "pi";
+
+export function estimatorToSQL(estimator: Estimator, field: string): string {
+  const col = isColumnName(field) ? `"${field}"` : `(${field})`;
+  switch (estimator) {
+    case "mean":
+      return `AVG(${col})`;
+    case "sum":
+      return `SUM(${col})`;
+    case "count":
+      return `COUNT(${col})`;
+    case "median":
+      return `MEDIAN(${col})`;
+    case "min":
+      return `MIN(${col})`;
+    case "max":
+      return `MAX(${col})`;
+  }
+}
+
+export function errorbarToSQL(
+  errorbar: ErrorBar,
+  estimator: Estimator,
+  field: string,
+): { lo: string; hi: string } {
+  const col = isColumnName(field) ? `"${field}"` : `(${field})`;
+  const agg = estimatorToSQL(estimator, field);
+  switch (errorbar) {
+    case "sd":
+      return { lo: `${agg} - STDDEV(${col})`, hi: `${agg} + STDDEV(${col})` };
+    case "se":
+      return {
+        lo: `${agg} - STDDEV(${col}) / SQRT(COUNT(${col}))`,
+        hi: `${agg} + STDDEV(${col}) / SQRT(COUNT(${col}))`,
+      };
+    case "ci":
+    case "pi":
+      return {
+        lo: `PERCENTILE_CONT(0.025) WITHIN GROUP (ORDER BY ${col})`,
+        hi: `PERCENTILE_CONT(0.975) WITHIN GROUP (ORDER BY ${col})`,
+      };
+  }
+}
+
 export function buildQuery(
   data: string | undefined,
   dims: Record<string, string>,
