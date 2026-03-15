@@ -291,6 +291,20 @@
       ]
     },
     {
+      "name": "field-selector",
+      "type": "registry:ui",
+      "title": "Field Selector",
+      "description": "Tableau-style field selector with dimension/measure classification and chart type switching.",
+      "dependencies": ["@n6k.io/db", "lucide-react"],
+      "registryDependencies": ["badge", "button", "popover"],
+      "files": [
+        {
+          "path": "src/components/ui/field-selector.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "recharts-bar-chart",
       "type": "registry:ui",
       "title": "Recharts Bar Chart",

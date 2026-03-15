@@ -5,7 +5,7 @@ import {
   temporalAxisConfig,
   type LegendOrient,
 } from "@/lib/n6k-chart-utils";
-import { useResolveData, type Field } from "@/lib/use-resolve-data";
+import { useResolveData, fieldExpr, type Field } from "@/lib/use-resolve-data";
 import {
   estimatorToSQL,
   errorbarToSQL,
@@ -225,14 +225,15 @@ function AggregateBarChart({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const dimensions: Record<string, string> = { x };
-  if (hue) dimensions.hue = hue;
+  const yExpr = fieldExpr(y);
+  const dimensions: Record<string, string> = { x: fieldExpr(x) };
+  if (hue) dimensions.hue = fieldExpr(hue);
 
   const measures: Record<string, string> = {
-    y: estimatorToSQL(estimator, y),
+    y: estimatorToSQL(estimator, yExpr),
   };
   if (errorbar) {
-    const { lo, hi } = errorbarToSQL(errorbar, estimator, y);
+    const { lo, hi } = errorbarToSQL(errorbar, estimator, yExpr);
     measures.error_lo = lo;
     measures.error_hi = hi;
   }

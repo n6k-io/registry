@@ -165,50 +165,34 @@ const sourceFiles = (component.files ?? [])
         <h2 class="mb-3 text-xs font-medium tracking-wider text-neutral-400 uppercase dark:text-neutral-600">
           Usage
         </h2>
-        <div class="space-y-4">
-          {componentDocs.exports.map((exp) => (
-            <div>
-              <div class="mb-1 flex items-center gap-2">
-                <span class="text-sm font-medium text-neutral-900 dark:text-neutral-200">
-                  {exp.name}
-                </span>
-                {exp.description && (
-                  <span class="text-xs text-neutral-500 dark:text-neutral-400">
-                    {exp.description}
-                  </span>
-                )}
-              </div>
-              <div class="group relative">
-                <pre class="overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300">
-                  <code class="copy-content">{exp.import}</code>
-                </pre>
-                <button
-                  class="copy-btn absolute top-2 right-2 rounded-md bg-neutral-200 p-1.5 text-neutral-500 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  aria-label={`Copy ${exp.name} import`}
-                >
-                  <svg
-                    class="copy-icon h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                  </svg>
-                  <svg
-                    class="check-icon hidden h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          ))}
+        <div class="group relative">
+          <pre class="overflow-x-auto rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300">
+            <code class="copy-content">{componentDocs.import || componentDocs.exports[0]?.import}</code>
+          </pre>
+          <button
+            class="copy-btn absolute top-2 right-2 rounded-md bg-neutral-200 p-1.5 text-neutral-500 opacity-0 group-hover:opacity-100 hover:text-neutral-900 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+            aria-label="Copy import"
+          >
+            <svg
+              class="copy-icon h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+            </svg>
+            <svg
+              class="check-icon hidden h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </button>
         </div>
       </section>
     )

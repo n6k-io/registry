@@ -28,7 +28,7 @@
     },
     {
       "title": "Interactive",
-      "description": "Configurable axes, hue, stacking, and palette.",
+      "description": "Field selector with palette.",
       "path": "./examples/recharts-bar-chart/bar-chart-02.tsx"
     }
   ],
@@ -40,8 +40,15 @@
     },
     {
       "title": "Interactive",
-      "description": "Configurable axes, hue, and palette.",
+      "description": "Field selector with palette.",
       "path": "./examples/recharts-line-chart/line-chart-02.tsx"
+    }
+  ],
+  "field-selector": [
+    {
+      "title": "Chart Switcher",
+      "description": "Field selector with chart type switching and palette.",
+      "path": "./examples/field-selector/field-selector-01.tsx"
     }
   ]
 }

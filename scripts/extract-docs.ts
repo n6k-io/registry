@@ -15,11 +15,13 @@ interface ExportDoc {
   name: string;
   description: string;
   import: string;
+  importPath: string;
   props: PropDoc[];
 }
 
 interface ComponentDoc {
   exports: ExportDoc[];
+  import: string;
 }
 
 const registry = JSON.parse(readFileSync(join(root, "registry.json"), "utf-8"));
@@ -106,12 +108,11 @@ for (const item of registry.items) {
         }
       }
 
-      const importLine = `import { ${fnName} } from "${importPath}"`;
-
       exports.push({
         name: fnName,
         description,
-        import: importLine,
+        import: "",
+        importPath,
         props,
       });
     }
@@ -121,7 +122,29 @@ for (const item of registry.items) {
   }
 
   if (exports.length > 0) {
-    docs[componentName] = { exports };
+    // Group exports by importPath into a single import statement
+    const byPath = new Map<string, string[]>();
+    for (const exp of exports) {
+      const names = byPath.get(exp.importPath) ?? [];
+      names.push(exp.name);
+      byPath.set(exp.importPath, names);
+    }
+    const importLines: string[] = [];
+    for (const [path, names] of byPath) {
+      if (names.length === 1) {
+        importLines.push(`import { ${names[0]} } from "${path}"`);
+      } else {
+        importLines.push(`import {\n  ${names.join(",\n  ")},\n} from "${path}"`);
+      }
+    }
+    const combinedImport = importLines.join("\n");
+
+    // Attach combined import to each export for backward compat, plus add a top-level field
+    for (const exp of exports) {
+      (exp as ExportDoc).import = combinedImport;
+    }
+
+    docs[componentName] = { exports: exports as ExportDoc[], import: combinedImport };
   }
 }
 
