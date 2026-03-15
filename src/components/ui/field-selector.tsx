@@ -375,11 +375,16 @@ function FieldSelectorInner({
   onChange,
 }: Omit<FieldSelectorProps, "table" | "columns"> & { columns: Column[] }) {
   const charts = Array.isArray(chartsProp) ? chartsProp : [chartsProp];
+  if (charts.length === 0) {
+    throw new Error("FieldSelector: `charts` must contain at least one chart component");
+  }
   const [activeIdx, setActiveIdx] = useState(0);
-  const Chart = charts[Math.min(activeIdx, charts.length - 1)];
-  const fieldDefs = Chart.fieldDefs;
-
   const [shelves, setShelves] = useState<ShelfState>(defaultValues ?? {});
+
+  const idx = Math.min(activeIdx, charts.length - 1);
+  const Chart = charts[idx];
+  if (!Chart) return null;
+  const fieldDefs = Chart.fieldDefs;
 
   function switchChart(idx: number) {
     setActiveIdx(idx);
